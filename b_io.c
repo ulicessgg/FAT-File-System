@@ -1,9 +1,9 @@
 /**************************************************************
-* Class::  CSC-415-0# Spring 2024
-* Name::
-* Student IDs::
-* GitHub-Name::
-* Group-Name::
+* Class::  CSC-415-01 Fall 2024
+* Name:: Ulices Gonzalez, Marco Robles, Yash Pachori, Prashrit Magar
+* Student IDs:: 923328897, 921282632, 923043313, 922068027
+* GitHub-Name:: csc415-filesystem-ulicessgg
+* Group-Name:: The Gunners
 * Project:: Basic File System
 *
 * File:: b_io.c
