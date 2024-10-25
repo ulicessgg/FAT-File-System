@@ -15,7 +15,7 @@
 typedef uint64_t;
 #endif
 
-typedef struct vcb
+typedef struct volumeControlBlock
 {
    uint64_t totalBlocks; // Total number of blocks in the volume // 8 bytes
    uint64_t blockSize; // Size of each block in bytes // 8 bytes
@@ -23,6 +23,6 @@ typedef struct vcb
    uint64_t freeBlockStart; // Index for the beginning of the free space in volume // 8 bytes
    uint64_t fatSize; // size of the file allocation table // 8 bytes
    uint64_t rootLoc; // Index for finding the root directory // 8 bytes
-   unsigned long volumeSignature;// Signature to identify the volume // 8 bytes
-   char sysType[8]; // Holds the type of volume/file system // 8 bytes
-} vcb;
+   unsigned long signature;// Signature to identify the volume // 8 bytes
+   char sysType[24]; // Holds the type of volume/file system // 8 bytes
+} volumeControlBlock;
