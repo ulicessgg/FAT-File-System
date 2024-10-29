@@ -17,12 +17,12 @@ typedef uint64_t uint64_t;
 
 typedef struct volumeControlBlock
 {
-   uint64_t totalBlocks; // Total number of blocks in the volume // 8 bytes
-   uint64_t blockSize; // Size of each block in bytes // 8 bytes
-   uint64_t freeBlockCount; // Where total free space is counted // 8 bytes
-   uint64_t freeBlockStart; // Index for the beginning of the free space in volume // 8 bytes
-   uint64_t fatSize; // size of the file allocation table // 8 bytes
-   uint64_t rootLoc; // Index for finding the root directory // 8 bytes
-   unsigned long signature;// Signature to identify the volume // 8 bytes
-   char sysType[24]; // Holds the type of volume/file system // 8 bytes
+    uint64_t signature;// Signature to identify the volume // 8 bytes
+    uint64_t totalBlocks; // number of blocks in the volume // 8 bytes
+    uint64_t blockSize; // Size of each block in bytes // 8 bytes
+    unsigned int freeBlockCount; // total free space count // 4 bytes
+    unsigned int freeBlockStart; // Start index for free space // 4 bytes
+    unsigned int fatSize; // size of the file allocation table // 4 bytes
+    unsigned int rootLoc; // Index for the root directory // 4 bytes
+    char sysType[24]; // Holds the type of volume/file system // 32 bytes
 } volumeControlBlock;

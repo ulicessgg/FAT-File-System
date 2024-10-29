@@ -28,7 +28,7 @@
 
 // to make sure that our vcb can be identified i decided to use the
 // first 9 digits of pi as our signature
-unsigned long signature = 314159265;
+uint64_t signature = 314159265358979323;
 
 // create a global instance of the vcb for system wide use
 volumeControlBlock* vcb;
