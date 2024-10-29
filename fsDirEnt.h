@@ -13,10 +13,7 @@
 **************************************************************/
 
 #ifndef time_t
-typedef time_t;
-#endif
-#ifndef bool
-typedef bool;
+typedef time_t time_t;
 #endif
 
 typedef struct dir_Entry 
@@ -26,8 +23,8 @@ typedef struct dir_Entry
     time_t last_accessed; // When accessed saves the timestamp, 8 bytes
     unsigned int blockPos; // Holds the index of the entry in blocks, 4 bytes
     unsigned int size; // Stores the size in bytes of the file, 4 bytes
-    bool is_Directory; // Differentiates if the entry is a new directory or a new file, 1 byte
-    char name[63]; // Name of the file or directory being created, 63 bytes
+    int is_Directory; // Differentiates if the entry is a new directory or a new file, 4 byte
+    char name[60]; // Name of the file or directory being created, 63 bytes
  } dir_Entry;
 
 dir_Entry createDirectory(); // refer to 10/15 and 10/17 lecture to implement

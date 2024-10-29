@@ -70,13 +70,14 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	// step 2 in milestone 1
 	else
 	{
+		printf("Volume Control Block not Present!\n");
 		// initialize the values in the volume control block
 		vcb->totalBlocks = numberOfBlocks;
 		vcb->blockSize = blockSize;
 		vcb->freeBlockCount = numberOfBlocks - 1; // TODO once the FAT has be initialized correct this
 		vcb->freeBlockStart = 1; // TODO once the FAT has be initialized correct this
-		vcb->fatSize = vcb->freeBlockCount; // TODO once the FAT has be initialized correct this
-		vcb->rootLoc = root->blockPos; // TODO once the FAT has be initialized correct this
+		// vcb->fatSize = vcb->freeBlockCount; // TODO once the FAT has be initialized correct this
+		// vcb->rootLoc = root->blockPos; // TODO once the FAT has be initialized correct this
 		vcb->signature = signature;
 		strcpy(vcb->sysType,"File Allocation Table");
 
@@ -84,10 +85,9 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 
 		// TODO initialize the root directory step 4 in milestone 1
 
-	}
+		printf("Finished initializing vcb!\n");
 
-	// write the vcb into block 0
-	LBAwrite(vcb, 1, 0);
+	}
 
 	return 0;
 }
@@ -101,4 +101,7 @@ void initFAT(uint64_t numberOfBlocks, uint64_t blockSize)
 void exitFileSystem ()
 {
 	printf ("System exiting\n");
+	// write the vcb into block 0
+	LBAwrite(vcb, 1, 0);
+	free(vcb);
 }

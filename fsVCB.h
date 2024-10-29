@@ -12,7 +12,7 @@
 **************************************************************/
 
 #ifndef uint64_t
-typedef uint64_t;
+typedef uint64_t uint64_t;
 #endif
 
 typedef struct volumeControlBlock
