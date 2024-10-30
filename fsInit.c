@@ -37,11 +37,49 @@ volumeControlBlock* vcb;
 // leave as a pointer so we can resize it dynamically as needed
 int* FAT;
 
+// Define a node in the FAT linked list
+typedef struct FATNode {
+    uint64_t blockIndex;
+    struct FATNode* next;
+} FATNode;
+
+// Global head of the linked list for free space tracking
+FATNode* freeListHead = NULL; // Initialize as NULL at the start
+
 // TODO inside of the fsDirEnt.c file implement createDirectory
 // then when we initialize the root we can pass this along and
 // mount it in initFileSystem so its saved in the FAT and we
 // can set the freeSpace info in the vcb!
 dir_Entry* root;
+
+// Helper function to initialize the FAT as a linked list
+void initFAT(uint64_t numberOfBlocks) {
+    FATNode* prevNode = NULL;
+
+    // Create a node for each block, starting from block 1 (block 0 is reserved for VCB)
+    for (uint64_t i = 1; i < numberOfBlocks; i++) {
+        FATNode* newNode = (FATNode*)malloc(sizeof(FATNode));
+        if (newNode == NULL) {
+            perror("Failed to allocate memory for FAT node");
+            exit(-1);
+        }
+        
+        // Initialize node properties
+        newNode->blockIndex = i;
+        newNode->next = NULL;
+        
+        // Link nodes together
+        if (prevNode == NULL) {
+            freeListHead = newNode;  // First node in the list becomes the head
+        } else {
+            prevNode->next = newNode;
+        }
+        
+        prevNode = newNode;
+    }
+    
+    printf("FAT linked list initialized with %lu blocks.\n", numberOfBlocks - 1);
+}
 
 // step 1 in milestone 1
 int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
@@ -92,10 +130,49 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	return 0;
 }
 
-//TODO implement helper function to initialize free space (FAT)
-void initFAT(uint64_t numberOfBlocks, uint64_t blockSize)
-{
+//Initialize the file system, including VCB and FAT
+int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
+    printf("Initializing File System with %lu blocks with a block size of %lu\n", numberOfBlocks, blockSize);
 
+    //Allocate memory for the VCB
+    vcb = (volumeControlBlock*)malloc(blockSize);
+    if (vcb == NULL) {
+        perror("FAILED TO ALLOCATE THE VCB");
+        free(vcb);
+        exit(-1);
+    }
+
+    //Read a block into the VCB
+    LBAread(vcb, 1, 0);
+
+    //Check if VCB is initialized
+    if (vcb->signature == signature) {
+        printf("Volume Control Block Present!\n");
+    } else {
+        printf("Volume Control Block not Present!\n");
+
+        //Initialize VCB fields
+        vcb->totalBlocks = numberOfBlocks;
+        vcb->blockSize = blockSize;
+        vcb->signature = signature;
+        strcpy(vcb->sysType, "File Allocation Table");
+
+        //Initialize the FAT as a linked list
+        initFAT(numberOfBlocks);
+
+        //Set VCB free block start to the index of the first free block
+        vcb->freeBlockStart = freeListHead->blockIndex;
+
+        //Set the size of FAT in blocks (each node represents one block)
+        vcb->fatSize = numberOfBlocks - 1;
+        vcb->freeBlockCount = numberOfBlocks - 1; // Exclude VCB block
+
+        //TODO: Initialize the root directory (step 4 in milestone 1)
+
+        printf("Finished initializing VCB and FAT as linked list!\n");
+    }
+
+    return 0;
 }
 	
 void exitFileSystem ()
