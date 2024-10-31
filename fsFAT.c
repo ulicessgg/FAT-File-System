@@ -1,49 +1,30 @@
-/**************************************************************
-* Class::  CSC-415-01 Fall 2024
-* Name:: Ulices Gonzalez, Marco Robles, Yash Pachori, Prashrit Magar
-* Student IDs:: 923328897, 921282632, 923043313, 922068027
-* GitHub-Name:: csc415-filesystem-ulicessgg
-* Group-Name:: The Gunners
-* Project:: Basic File System
-*
-* File:: fsInit.c
-*
-* Description:: Main driver for file system assignment.
-*
-* This file is where you will start and initialize your system
-*
-**************************************************************/
-
+//fsFAT.c
 
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#include "fsFAT.h"
+#include "fsVCB.h"
+#include "fsDirEnt.h"
 
-#include "fsLow.h"
-#include "mfs.h"
-#include "fsVCB.h"		// ensure this is always present!
-#include "fsDirEnt.h"	// ensure this is always present!
-
-// to make sure that our vcb can be identified i decided to use the
-// first 9 digits of pi as our signature
-uint64_t signature = 314159265358979323;
-
-// create a global instance of the vcb for system wide use
+//Global declarations
 volumeControlBlock* vcb;
+const uint64_t signature = 314159265358979323;
 
-// since we are using a FAT we can do this using an int array
-// leave as a pointer so we can resize it dynamically as needed
-int* FAT;
+FATNode* freeListHead = NULL; //Initialize the free list head
 
-// TODO inside of the fsDirEnt.c file implement createDirectory
-// then when we initialize the root we can pass this along and
-// mount it in initFileSystem so its saved in the FAT and we
-// can set the freeSpace info in the vcb!
-dir_Entry* root;
 
-// Helper function to initialize the FAT as a linked list
+
+void freeFAT() {
+    FATNode* current = freeListHead;
+    while (current != NULL) {
+        FATNode* temp = current;
+        current = current->next;
+        free(temp);
+    }
+    freeListHead = NULL; // Reset head pointer
+}
+
 void initFAT(uint64_t numberOfBlocks) {
     FATNode* prevNode = NULL;
 
@@ -164,12 +145,4 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
     }
 
     return 0;
-}
-	
-void exitFileSystem ()
-{
-	printf ("System exiting\n");
-	// write the vcb into block 0
-	LBAwrite(vcb, 1, 0);
-	free(vcb);
 }
