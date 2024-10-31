@@ -11,6 +11,9 @@
 * function prototypes to implement in the .c file
 *
 **************************************************************/
+#ifndef FSDIRENT_H
+#define FSDIRENT_H
+
 
 #ifndef time_t
 typedef time_t time_t;
@@ -27,4 +30,6 @@ typedef struct dir_Entry
     char name[60]; // Name of the file or directory being created, 60 bytes
 } dir_Entry;
 
-dir_Entry createDirectory(); // refer to 10/15 and 10/17 lecture to implement
+dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent) ; // refer to 10/15 and 10/17 lecture to implement
+
+#endif
