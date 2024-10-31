@@ -25,7 +25,13 @@
 #include "fsVCB.h"
 #include "fsDirEnt.h"
 
-// Unique signature for VCB identification
+/* USE THIS TO TEST THE HEXDUMP
+
+Hexdump/hexdump.linux SampleVolume --start 1 --count 3
+
+*/
+
+// first 18 digits of pi as our signature
 uint64_t signature = 314159265358979323;
 
 // Global instances for system-wide use
@@ -33,89 +39,87 @@ volumeControlBlock* vcb;
 int* FAT;
 dir_Entry* root;
 
-void initFAT(uint64_t numberOfBlocks) {
-    FAT = (int*)malloc(numberOfBlocks * sizeof(int));
-    if (FAT == NULL) {
-        perror("FAILED TO ALLOCATE THE FAT ARRAY");
-        exit(-1);
-    }
-    
-    // Initialize FAT with -1 (indicating all blocks are free)
-    for (uint64_t i = 0; i < numberOfBlocks; i++) {
-        FAT[i] = -1;
-    }
-    printf("FAT array initialized with %lu blocks.\n", numberOfBlocks);
-}
+// step 1 in milestone 1
+int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
+{
+	printf ("Initializing File System with %ld blocks with a block size of %ld\n", numberOfBlocks, blockSize);
 
-int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize) {
-    printf("Initializing File System with %lu blocks and a block size of %lu\n", numberOfBlocks, blockSize);
+	// allocate the memory for the vcb
+	vcb = malloc(blockSize);
+	if(vcb == NULL)
+	{
+		perror("FAILED TO ALLOCATE THE VCB");
+		free(vcb);
+		exit(-1);
+	}
 
-    // Allocate and initialize the VCB
-    vcb = (volumeControlBlock*)malloc(sizeof(volumeControlBlock));
-    if (vcb == NULL) {
-        perror("FAILED TO ALLOCATE THE VCB");
-        exit(-1);
-    }
+	// read a block into the vcb
+	LBAread(vcb, 1, 0);
 
-    // Load VCB from disk
-    LBAread(vcb, 1, 0);
+	// check if the vcb has been initialized if it has proceed to end of init
+	if(vcb->signature == signature)
+	{
+		printf("Volume Control Block Present!\n");
+		LBAread(FAT, vcb->freeBlockCount, vcb->freeBlockStart);
+		if(FAT == NULL)
+		{
+			perror("FAILED TO LOAD FAT");
+			free(FAT);
+			exit(-1);
+		}
 
-    // If VCB is already initialized
-    if (vcb->signature == signature) {
-        printf("Volume Control Block Present!\n");
+		LBAread(root, 1, vcb->rootLoc);
+		if(root == NULL)
+		{
+			perror("FAILED TO LOAD ROOT");
+			free(root);
+			exit(-1);
+		}
+	}
 
-        // Load FAT and root directory from disk
-        FAT = (int*)malloc(vcb->freeBlockCount * sizeof(int));
-        if (FAT == NULL) {
-            perror("FAILED TO LOAD FAT");
-            exit(-1);
-        }
-        LBAread(FAT, vcb->freeBlockCount, vcb->freeBlockStart);
-
-        root = (dir_Entry*)malloc(blockSize);
-        if (root == NULL) {
-            perror("FAILED TO LOAD ROOT");
-            free(FAT);
-            exit(-1);
-        }
-        LBAread(root, 1, vcb->rootLoc);
-
-    } else {
-        printf("Volume Control Block not Present! Initializing new file system.\n");
-
-        // Initialize the FAT array
+	// if the vcb has not been initialized proceed to initializing its values
+	// step 2 in milestone 1
+	else
+	{
+		printf("Volume Control Block not Present!\n");
+		
+		// step 3 of milestone 1
+		//Initialize the FAT as a linked list
         initFAT(numberOfBlocks);
 
-        // Allocate and initialize root directory entry
-        root = (dir_Entry*)malloc(blockSize);
-        if (root == NULL) {
-            perror("FAILED TO ALLOCATE ROOT");
-            free(FAT);
-            exit(-1);
-        }
+		//allocate the memory for the vcb
+		root = malloc(blockSize);
+		if(root == NULL)
+		{
+			perror("FAILED TO ALLOCATE THE ROOT");
+			free(root);
+			exit(-1);
+		}
 
-        // Initialize VCB fields
-        vcb->totalBlocks = numberOfBlocks;
-        vcb->blockSize = blockSize;
-        vcb->freeBlockCount = numberOfBlocks - 1; // Reserve one block for the VCB
-        vcb->freeBlockStart = 1; // FAT starts after the VCB
-        vcb->fatSize = numberOfBlocks - 1;
-        vcb->rootLoc = 2; // Example location for the root directory
-        vcb->signature = signature;
-        strcpy(vcb->sysType, "File Allocation Table");
+		// step 4 of milestone 1
+		// Create the root directory
+		root = createDirectory(6, NULL); // 0 for now as we are not handling files yet
 
-        // Write initialized VCB, FAT, and root directory to disk
-        LBAwrite(vcb, 1, 0);
-        LBAwrite(FAT, numberOfBlocks - 1, 1);
-        LBAwrite(root, 1, vcb->rootLoc);
+		// initialize the values in the volume control block
+		vcb->totalBlocks = numberOfBlocks;
+		vcb->blockSize = blockSize;
+		vcb->freeBlockCount = numberOfBlocks - 1; 
+		vcb->fatSize = numberOfBlocks - 1; 
+		//vcb->rootLoc = root->blockPos; 
+		vcb->signature = signature;
+		strcpy(vcb->sysType,"File Allocation Table");
 
-        printf("Finished initializing VCB, FAT, and root directory.\n");
-    }
+		// write the vcb into block 0
+		LBAwrite(vcb, 1, 0);
+		LBAwrite(FAT, 1, 1);
+		printf("Finished initializing VCB and FAT!\n");
+	}
 
-    return 0;
+	return 0;
 }
 
-void exitFileSystem() {
+void exitFileSystem() 
+{
     printf("System exiting\n");
 
     if (vcb != NULL) {
