@@ -1,18 +1,30 @@
-//fsFAT.h
-#ifndef FS_FAT_H
-#define FS_FAT_H
+/**************************************************************
+* Class::  CSC-415-01 Fall 2024
+* Name:: Ulices Gonzalez, Marco Robles, Yash Pachori, Prashrit Magar
+* Student IDs:: 923328897, 921282632, 923043313, 922068027
+* GitHub-Name:: csc415-filesystem-ulicessgg
+* Group-Name:: The Gunners
+*
+* File:: fsVCB.h
+*
+* Description:: creates the volume control block struct
+*
+**************************************************************/
+#ifndef FSFAT_H
+#define FSFAT_H
 
-#include <stdint.h>
+#ifndef uint64_t
+typedef uint64_t uint64_t;
+#endif
 
 // Define a node in the FAT linked list
-typedef struct FATNode {
+typedef struct FATNode 
+{
     uint64_t blockIndex;
     struct FATNode* next;
 } FATNode;
 
-extern FATNode* freeListHead; //Declare the freeListHead variable
+FATNode* initFAT(FATNode* freeListHead, uint64_t numberOfBlocks);
+FATNode* freeFAT(FATNode* freeListHead); //Function to free the FAT linked list
 
-void initFAT(uint64_t numberOfBlocks);
-void freeFAT(); //Function to free the FAT linked list
-
-#endif //FS_FAT_H
+#endif
