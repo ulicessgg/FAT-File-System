@@ -14,6 +14,12 @@
 *
 **************************************************************/
 
+/* USE THIS TO TEST THE HEXDUMP
+
+Hexdump/hexdump.linux SampleVolume --start 1 --count 3
+
+*/
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -33,15 +39,14 @@ uint64_t signature = 314159265358979323;
 // create a global instance of the vcb for system wide use
 volumeControlBlock* vcb;
 
-FATNode* freeListHead;
+int* FAT;
 
 dir_Entry* root;
 
 // step 1 in milestone 1
 int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 {
-	printf ("Initializing File System with %ld blocks with a block size of %ld\n", 
-			numberOfBlocks, blockSize);
+	printf ("Initializing File System with %ld blocks with a block size of %ld\n", numberOfBlocks, blockSize);
 	/* TODO: Add any code you need to initialize your file system. */
 
 	//allocate the memory for the vcb
@@ -60,11 +65,11 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	if(vcb->signature == signature)
 	{
 		printf("Volume Control Block Present!\n");
-		LBAread(freeListHead, vcb->freeBlockCount, vcb->freeBlockStart);
-		if(freeListHead == NULL)
+		LBAread(FAT, vcb->freeBlockCount, vcb->freeBlockStart);
+		if(FAT == NULL)
 		{
 			perror("FAILED TO LOAD FAT");
-			free(freeListHead);
+			free(FAT);
 			exit(-1);
 		}
 
@@ -85,36 +90,45 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		
 		// step 3 of milestone 1
 		//Initialize the FAT as a linked list
-        freeListHead = initFAT(freeListHead, numberOfBlocks);
-		if(freeListHead == NULL)
+        //freeListHead = initFAT(freeListHead, numberOfBlocks);
+
+		//allocate the memory for the vcb
+		FAT = malloc(numberOfBlocks);
+		if(FAT == NULL)
 		{
-			perror("FAILED TO CREATE THE FAT");
-			freeListHead = freeFAT(freeListHead);
+			perror("FAILED TO ALLOCATE THE FAT");
+			free(FAT);
+			exit(-1);
+		}
+
+		FAT[0] = -1;
+
+		//allocate the memory for the vcb
+		root = malloc(blockSize);
+		if(root == NULL)
+		{
+			perror("FAILED TO ALLOCATE THE ROOT");
+			free(root);
 			exit(-1);
 		}
 
 		// step 4 of milestone 1
 		// Create the root directory
-		root = createDirectory(0, NULL); // 0 for now as we are not handling files yet
-		if(freeListHead == NULL)
-		{
-			perror("FAILED TO CREATE THE ROOT");
-			free(root);
-			exit(-1);
-		}
+		//root = createDirectory(51, NULL); // 0 for now as we are not handling files yet
 
 		// initialize the values in the volume control block
 		vcb->totalBlocks = numberOfBlocks;
 		vcb->blockSize = blockSize;
 		vcb->freeBlockCount = numberOfBlocks - 1; 
-		vcb->freeBlockStart = freeListHead->blockIndex;
+		//vcb->freeBlockStart = freeListHead->blockIndex;
 		vcb->fatSize = numberOfBlocks - 1; 
-		vcb->rootLoc = root->blockPos; 
+		//vcb->rootLoc = root->blockPos; 
 		vcb->signature = signature;
 		strcpy(vcb->sysType,"File Allocation Table");
 
 		// write the vcb into block 0
 		LBAwrite(vcb, 1, 0);
+		LBAwrite(FAT, 1, 1);
 		printf("Finished initializing VCB and FAT!\n");
 	}
 
@@ -125,10 +139,10 @@ void exitFileSystem ()
 {
 	printf ("System exiting\n");
 	free(vcb);
-	freeListHead = freeFAT(freeListHead);
-	free(root);
+	//freeListHead = freeFAT(freeListHead);
+	//free(root);
 
 	vcb = NULL;
-	freeListHead = NULL;
-	root = NULL;
+	//freeListHead = NULL;
+	//root = NULL;
 }
