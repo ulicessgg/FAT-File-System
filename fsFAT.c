@@ -40,3 +40,9 @@ void initFAT(uint64_t numberOfBlocks, uint64_t blockSize) {
 	FAT[0] = -1;
     printf("FAT array initialized with %lu blocks.\n", numberOfBlocks);
 }
+
+int allocateBlocks(uint64_t numberOfBlocks, uint64_t blockSize)
+{
+    //TODO
+    return 0;
+}
