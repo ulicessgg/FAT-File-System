@@ -48,6 +48,12 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
     }
     int location = allocateBlocks(numOfBlocks, BLOCKSIZE);
 
+    if(location <= 2)
+    {
+        location = 3;
+    }
+    printf("the block of the root is at %d", location);
+
     // Used to assign the current time to directores being created now
     time_t now = time(NULL);
 
