@@ -26,3 +26,5 @@ typedef struct volumeControlBlock
     unsigned int rootLoc; // Index for the root directory // 4 bytes
     char sysType[24]; // Holds the type of volume/file system // 32 bytes
 } volumeControlBlock;
+
+extern volumeControlBlock* vcb;

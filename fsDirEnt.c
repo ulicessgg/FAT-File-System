@@ -23,6 +23,7 @@
 #include "mfs.h"
 #include "fsDirEnt.h"	// ensure this is always present!
 #include "fsFAT.h"      // used for blockPOS!
+#include "fsVCB.h"
 
 #define BLOCKSIZE 512
 
@@ -45,7 +46,7 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
         free(new);
         exit(-1);
     }
-    // int location = allocateBlocks(numOfBlocks, BLOCKSIZE);
+    int location = allocateBlocks(numOfBlocks, BLOCKSIZE);
 
     // Used to assign the current time to directores being created now
     time_t now = time(NULL);
@@ -58,7 +59,7 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
         new[i].last_edited = now;
         new[i].last_accessed = now;
         new[i].is_Directory = 0;
-        strcpy(new[i].name, "");
+        strcpy(new[i].name, "nullFile");
         new[i].size = 0;
         new[i].blockPos = -1;
     }
@@ -69,7 +70,7 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
     new[0].last_accessed = now;
     new[0].is_Directory = 1;
     strcpy(new[0].name, ".");
-    new[0].blockPos = 1; // will be changed once freespace management is fully done
+    new[0].blockPos = location; // will be changed once freespace management is fully done
     new[0].size = actualNumOfEntries * sizeof(dir_Entry);
 
     // Intializing parent dir (..)
@@ -86,7 +87,7 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
     new[1].last_accessed = parent[0].last_accessed;
     new[1].is_Directory = parent[0].is_Directory;
 
-    //LBAwrite(new, new[0].size + ((BLOCKSIZE-1)/BLOCKSIZE), new[0].blockPos);
+    LBAwrite(new, new[0].size + ((BLOCKSIZE-1)/BLOCKSIZE), new[0].blockPos);
 
     return new;
 }
