@@ -62,7 +62,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	{
 		printf("Volume Control Block Present!\n");
 		LBAread(FAT, 1, 1);
-		if(FAT == NULL)
+		if(FAT != NULL)
 		{
 			perror("FAILED TO LOAD FAT");
 			free(FAT);
@@ -70,7 +70,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		}
 
 		LBAread(root, 1, vcb->rootLoc);
-		if(root == NULL)
+		if(root != NULL)
 		{
 			perror("FAILED TO LOAD ROOT");
 			free(root);
