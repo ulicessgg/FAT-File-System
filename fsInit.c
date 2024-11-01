@@ -61,7 +61,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	if(vcb->signature == signature)
 	{
 		printf("Volume Control Block Present!\n");
-		LBAread(FAT, vcb->freeBlockCount, vcb->freeBlockStart);
+		LBAread(FAT, 1, 1);
 		if(FAT == NULL)
 		{
 			perror("FAILED TO LOAD FAT");
@@ -86,6 +86,13 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		
 		// step 3 of milestone 1
 		//Initialize the FAT as a linked list
+		FAT = malloc(numberOfBlocks * sizeof(int));
+		if (FAT == NULL) {
+			perror("FAILED TO ALLOCATE THE FAT ARRAY");
+			free(FAT);
+			exit(-1);
+		}
+    
         initFAT(numberOfBlocks);
 
 		//allocate the memory for the vcb
@@ -123,18 +130,13 @@ void exitFileSystem()
 {
     printf("System exiting\n");
 
-    if (vcb != NULL) {
-        free(vcb);
-        vcb = NULL;
-    }
-    
-    if (FAT != NULL) {
-        free(FAT);
-        FAT = NULL;
-    }
-    
-    if (root != NULL) {
-        free(root);
-        root = NULL;
-    }
+    free(vcb);
+    vcb = NULL;
+	printf("Freed vcb\n");
+    //free(FAT);
+    FAT = NULL;
+	printf("Freed FAT\n");
+	free(root);
+    root = NULL;
+	printf("Freed Root\n");
 }

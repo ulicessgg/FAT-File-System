@@ -48,9 +48,9 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
     }
     int location = allocateBlocks(numOfBlocks, BLOCKSIZE);
 
-    if(location <= 2)
+    if(location <= 1)
     {
-        location = 3;
+        location = 2;
     }
     printf("the block of the root is at %d", location);
 

@@ -25,13 +25,6 @@
 #include "fsVCB.h"
 
 void initFAT(uint64_t numberOfBlocks) {
-    FAT = malloc(numberOfBlocks * sizeof(int));
-    if (FAT == NULL) {
-        perror("FAILED TO ALLOCATE THE FAT ARRAY");
-		free(FAT);
-        exit(-1);
-    }
-    
     // Initialize FAT with -1 (indicating all blocks are free)
     for (uint64_t i = 0; i < numberOfBlocks; i++) {
         FAT[i] = 1;
