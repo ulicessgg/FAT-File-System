@@ -5,10 +5,10 @@
 * GitHub-Name:: csc415-filesystem-ulicessgg
 * Group-Name:: The Gunners
 *
-* File:: fsDirEnt.h
+* File:: fsFAT.h
 *
-* Description:: creates the directory entry struct and helper
-* function prototypes to implement in the .c file
+* Description:: creates function prototypes for Freespace
+* management as well as global instance of the FAT
 *
 **************************************************************/
 #ifndef FSFAT_H

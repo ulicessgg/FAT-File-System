@@ -6,10 +6,10 @@
 * Group-Name:: The Gunners
 * Project:: Basic File System
 *
-* File:: fsDirEnt.c
+* File:: fsFAT.c
 *
-* Description:: Implementing of the directory functions using
-* prototypes found in the .h file
+* Description:: implements the initialization of the FAT
+* as well as the allocation of blocks for directory creation
 *
 **************************************************************/
 

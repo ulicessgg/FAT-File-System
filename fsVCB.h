@@ -8,6 +8,7 @@
 * File:: fsVCB.h
 *
 * Description:: creates the volume control block struct
+* along with global instance for use
 *
 **************************************************************/
 
