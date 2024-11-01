@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "fsLow.h"
 #include "mfs.h"
@@ -38,6 +39,41 @@ uint64_t signature = 314159265358979323;
 volumeControlBlock* vcb;
 int* FAT;
 dir_Entry* root;
+
+// Function to find and allocate a single free block
+int allocateBlock() {
+    for (uint64_t i = 1; i < vcb->totalBlocks; i++) {
+        if (FAT[i] == -1) { // Block is free
+            FAT[i] = -2;    // Mark block as EOF if it's single block allocation
+            vcb->freeBlockCount--;  // Update dree block count in VCB
+            return i;
+        }
+    }
+    return -1; // Return -1 if there's no free blocks available
+}
+
+// Function to allocate multiple blocks for a file, returns starting block index
+int allocateBlocksForFile(uint64_t blockCount) {
+	int startBlock = -1, prevBlock = -1;
+	for (uint64_t i = 0; i < blockCount; i++) {
+		int currentBlock = allocateBlock();
+		if (currentBlock == -1) {
+			fprintf(stderr, "Error: Not enough free blocks available\n");
+			return -1; // not enough blocks are availble
+		}
+
+		if (i==0) {
+			startBlock = currentBlock; // Start of file
+		} else {
+			FAT[prevBlock] = currentBlock; // Link the previous block to the current
+		}
+		prevBlock = currentBlock; // Update previous block
+	}
+
+	FAT[prevBlock] = -1; // Mark EOF chain
+	return startBlock; // Return the starting block
+}
+
 
 // step 1 in milestone 1
 int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
