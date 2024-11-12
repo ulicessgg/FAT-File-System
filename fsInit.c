@@ -25,6 +25,7 @@
 #include "mfs.h"
 #include "fsVCB.h"
 #include "fsDirEnt.h"
+#include "fsFAT.h"
 
 /* USE THIS TO TEST THE HEXDUMP
 
@@ -93,7 +94,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 			exit(-1);
 		}
     
-        initFAT(numberOfBlocks);
+        initFAT(numberOfBlocks, 0);
 
 		//allocate the memory for the vcb
 		root = malloc(blockSize);

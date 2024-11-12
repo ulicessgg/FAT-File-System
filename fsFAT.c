@@ -24,15 +24,41 @@
 #include "fsFAT.h"	// ensure this is always present!
 #include "fsVCB.h"
 
-void initFAT(uint64_t numberOfBlocks) {
-    // Initialize FAT with -1 (indicating all blocks are free)
-    for (uint64_t i = 0; i < numberOfBlocks; i++) {
-        FAT[i] = 1;
+int initFAT(uint64_t numberOfBlocks, uint64_t last_block_in_file) {
+    if (numberOfBlocks < 1) {
+        return -1;
     }
-	// Set the first value in the FAT as -1 to mark the VCB location
-	FAT[0] = -1;
-    FAT[1] = -2;
-    printf("FAT array initialized with %lu blocks.\n", numberOfBlocks);
+
+    if (numberOfBlocks > vcb->freeBlockCount) {
+        return -1;
+    }
+
+    int head = vcb->freeBlockStart;
+    int currentBlock = vcb->freeBlockStart;
+    int nextBlock = FAT[currentBlock];
+
+    //modify the tail of the exsiting file to point at new blocks
+    if (last_block_in_file > 0) {
+        FAT[last_block_in_file] = head;
+    }
+
+    vcb->freeBlockCount--;
+
+    // Traverse and acquire the free space requested
+    for (int i = 1; i < numberOfBlocks; i++) {
+        currentBlock = nextBlock;
+        nextBlock = FAT[currentBlock];
+        vcb->freeBlockCount--;
+    }
+
+    // Sentinel value to indicate end of requested free space
+    FAT[currentBlock] = 0xFFFFFFFD;
+    vcb->freeBlockStart = nextBlock;
+
+    // Update the FAT table in Volume
+    LBAwrite(FAT, vcb->fatSize, vcb->rootLoc);
+
+    return head;
 }
 
 // Function to find and allocate a single free block
