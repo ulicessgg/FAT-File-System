@@ -75,8 +75,6 @@ int allocateBlock() {
 }
 
 // Function to allocate multiple blocks for a file, returns starting block index
-
-// TODO: remove blocksize, prof said just put block size in the file 512
 int allocateBlocks(uint64_t blockCount, uint64_t blockSize) {
 	int startBlock = -1, prevBlock = -1;
 	for (uint64_t i = 2; i < blockCount; i++) {
