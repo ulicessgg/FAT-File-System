@@ -65,8 +65,9 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
         new[i].last_edited = now;
         new[i].last_accessed = now;
         new[i].is_Directory = 0;
-        strcpy(new[i].name, "nullFile");
+        strcpy(new[i].name, "NO USED");
         new[i].size = 0;
+        //TODO: Block position should be given by the allocateBlocks function
         new[i].blockPos = -1;
     }
 
@@ -85,7 +86,7 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
         parent = new;
     }
 
-    strcpy(new[0].name, "..");
+    strcpy(new[1].name, "..");
     new[1].blockPos = parent[0].blockPos;
     new[1].size = parent[0].size;
     new[1].creation_date = parent[0].creation_date;

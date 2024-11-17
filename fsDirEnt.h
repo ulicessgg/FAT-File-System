@@ -1,6 +1,7 @@
 /**************************************************************
 * Class::  CSC-415-01 Fall 2024
-* Name:: Ulices Gonzalez, Marco Robles, Yash Pachori, Prashrit Magar
+* Name:: Ulices Gonzalez, Marco Robles, Yash Pachori, Prashrit 
+* Magar
 * Student IDs:: 923328897, 921282632, 923043313, 922068027
 * GitHub-Name:: csc415-filesystem-ulicessgg
 * Group-Name:: The Gunners
