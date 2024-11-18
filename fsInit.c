@@ -106,7 +106,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 			exit(-1);
 		}
     
-        initFAT(numberOfBlocks, 0);
+        initFAT(numberOfBlocks, numberOfBlocks);
 
 		//allocate the memory for the vcb
 		printf("Allocating memory for the root directory\n"); //debugging
@@ -129,7 +129,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		vcb->fatSize = numberOfBlocks - 1; 
 		vcb->rootLoc = root->blockPos; 
 		vcb->signature = signature;
-		strcpy(vcb->sysType,"File Allocation Table");
+		strcpy(vcb->sysType,"The Gunners");
 
 		// write the vcb into block 0
 		printf("Writing the VCB to block 0\n"); //debugging
