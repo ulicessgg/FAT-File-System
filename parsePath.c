@@ -66,38 +66,44 @@ if(token1 == null)
 
 }
 
-token2 = strtok_r(null, "/", savePtr)
-int dirIndex = findInDir(parent, token1)
-
-// gives the parent Dir, index of the element in the parent dir
-// and the name of that element
-// token 1 is the last element and we can use this info to do 
-// what the funciton needs to do
-if(token2 == null)
+//loop while 
+while(token2 != null)
 {
-    * returnParent = parent;
-    * index = dirIndex;
-    * lastElement = token1;
-    return 0;
-}
+    token2 = strtok_r(null, "/", savePtr)
+    int dirIndex = findInDir(parent, token1)
 
-// invalid path 
-if(dirIndex == -1)
-{
+    // gives the parent Dir, index of the element in the parent dir
+    // and the name of that element
+    // token 1 is the last element and we can use this info to do 
+    // what the funciton needs to do
+    if(token2 == null)
+    {
+        * returnParent = parent;
+        * index = dirIndex;
+        * lastElement = token1;
+        return 0;
+    }
+
+    // invalid path 
+    if(dirIndex == -1)
+    {
+        return -1;
+    }
+    // if it is not a directory then there is alredy a
+    // file or invalid path
+    else if(parent[dirIndex].isDir == 0)
+    {
     return -1;
-}
-// if it is not a directory then there is alredy a
-// file or invalid path
-else if(!(parent[dirIndex].isDir))
-{
-return -1;
-}
-{
+    }
+    
 
-}
-
-// with the valid path we load this new directory into memory
-dir_Entry * new parent = loadDir(&parent[dirIndex]);
+    // with the valid path we load this new directory into memory
+    dir_Entry * newParent = loadDir(&parent[dirIndex]);
+    //freeDIr(parent)
+    // adjusting new staring points
+    parent = newParent;
+    token1 = token2;
+     
 
 
 }

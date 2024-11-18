@@ -25,7 +25,8 @@ typedef struct volumeControlBlock
     unsigned int freeBlockStart; // Start index for free space // 4 bytes
     unsigned int fatSize; // size of the file allocation table // 4 bytes
     unsigned int rootLoc; // Index for the root directory // 4 bytes
-    char sysType[24]; // Holds the type of volume/file system // 32 bytes
+    unsigned int fatLoc; // location of FAT
+    char sysType[20]; // Holds the type of volume/file system // 32 bytes
 } volumeControlBlock;
 
 extern volumeControlBlock* vcb;

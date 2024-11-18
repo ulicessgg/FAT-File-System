@@ -20,7 +20,7 @@ typedef uint64_t uint64_t;
 
 extern int* FAT;
 
-int initFAT(uint64_t numberOfBlocks, uint64_t last_block_in_file);
+int initFAT(uint64_t numBlocks, uint64_t lastBlock);
 int allocateBlock();
 int allocateBlocks(uint64_t blockCount, uint64_t blockSize);
 

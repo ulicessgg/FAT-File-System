@@ -39,6 +39,7 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
     int totalNumOfBytes = numOfBlocks * BLOCKSIZE;
     int actualNumOfEntries = totalNumOfBytes / sizeof(dir_Entry);
 
+    // Allocating memory for new directory entries
     dir_Entry* new = malloc(totalNumOfBytes);
     if(new == NULL)
     {
@@ -94,20 +95,21 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
     new[1].last_accessed = parent[0].last_accessed;
     new[1].is_Directory = parent[0].is_Directory;
 
+    // Call LBA write for each dir entry created for discontigious allocation?
     LBAwrite(new, new[0].size + ((BLOCKSIZE-1)/BLOCKSIZE), new[0].blockPos);
 
     return new;
 }
 
-// true if it is a directory and false if not
-boolean isDir(dir_Entry * entry){
-if(entry.is_Directory == 1)
+// 1 if it is a directory and 0 if not
+int isDir(dir_Entry * entry){
+if(entry->is_Directory == 1)
 {
-    return true;
+    return 1;
 }
 else
 {
-    return false;
+    return 0;
 }
 }
 
@@ -117,7 +119,7 @@ else
 dir_Entry * loadDir(dir_Entry * entry)
 {
 
-    dir_Entry * newDir = malloc(sizeof(dir_Entry))
+    dir_Entry * newDir = malloc(sizeof(dir_Entry));
     if(newDir == NULL)
     {
         perror("FAILED TO ALLOCATE DIRECTORY");
@@ -125,7 +127,19 @@ dir_Entry * loadDir(dir_Entry * entry)
         exit(-1);
     }
     
-    LBAread(newDir,newDir.size, newDir.blockPos);
+    LBAread(newDir,newDir->size, newDir->blockPos);
 
     return newDir;
+}
+
+// Allows user to rename the Directory Entry
+dir_Entry * renameDirEntry(int blockLocation)
+{
+
+}
+
+// Allows user to assign the file type of a Directory Entry
+int assignFile(int f)
+{
+return 0;
 }

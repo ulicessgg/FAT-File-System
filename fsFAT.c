@@ -24,41 +24,36 @@
 #include "fsFAT.h"	// ensure this is always present!
 #include "fsVCB.h"
 
-int initFAT(uint64_t numberOfBlocks, uint64_t last_block_in_file) {
-    if (numberOfBlocks < 1) {
+int initFAT(uint64_t numBlocks, uint64_t lastBlock) {
+    int requiredBytes = numBlocks * sizeof(int);
+    int blocksOccupied = (requiredBytes + lastBlock - 1) / lastBlock;
+
+    //debugging
+    //printf("Calculating blocksNeeded: vcb->blockSize = %1d\n", vcb->blockSize);
+
+    // Set the link values 
+    for (int i = 0; i < numBlocks; i++) {
+        if (i == 0 || i == blocksOccupied || i == numBlocks) {
+            FAT[i] = 0xBE1355;
+        }
+        else {
+            FAT[i] = i+1;
+        }
+    }
+
+    // update the vcb with fat info
+    vcb->freeBlockCount = numBlocks - blocksOccupied - 1;
+    vcb->fatSize = blocksOccupied;
+    vcb->fatLoc = 1;
+    vcb->freeBlockStart = blocksOccupied + 1;
+
+    // Write FAT to disk and check for errors
+    if (LBAwrite(FAT, blocksOccupied, 1) == -1)
+    {
         return -1;
     }
 
-    if (numberOfBlocks > vcb->freeBlockCount) {
-        return -1;
-    }
-
-    int head = vcb->freeBlockStart;
-    int currentBlock = vcb->freeBlockStart;
-    int nextBlock = FAT[currentBlock];
-
-    //modify the tail of the exsiting file to point at new blocks
-    if (last_block_in_file > 0) {
-        FAT[last_block_in_file] = head;
-    }
-
-    vcb->freeBlockCount--;
-
-    // Traverse and acquire the free space requested
-    for (int i = 1; i < numberOfBlocks; i++) {
-        currentBlock = nextBlock;
-        nextBlock = FAT[currentBlock];
-        vcb->freeBlockCount--;
-    }
-
-    // Sentinel value to indicate end of requested free space
-    FAT[currentBlock] = 0xFFFFFFFD;
-    vcb->freeBlockStart = nextBlock;
-
-    // Update the FAT table in Volume
-    LBAwrite(FAT, vcb->fatSize, vcb->rootLoc);
-
-    return head;
+    return 0;
 }
 
 // Function to find and allocate a single free block
@@ -75,8 +70,6 @@ int allocateBlock() {
 }
 
 // Function to allocate multiple blocks for a file, returns starting block index
-
-// TODO: remove blocksize, prof said just put block size in the file 512
 int allocateBlocks(uint64_t blockCount, uint64_t blockSize) {
 	int startBlock = -1, prevBlock = -1;
 	for (uint64_t i = 2; i < blockCount; i++) {

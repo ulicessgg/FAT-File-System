@@ -54,6 +54,9 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		free(vcb);
 		exit(-1);
 	}
+	else {
+		printf("VCB memory allocated successfully.\n");
+	}
 
 	// read a block into the vcb
 	LBAread(vcb, 1, 0);
@@ -63,7 +66,8 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	{
 		printf("Volume Control Block Present!\n");
 		LBAread(FAT, 1, 1);
-		if(FAT != NULL)
+
+		if(FAT == NULL)
 		{
 			perror("FAILED TO LOAD FAT");
 			free(FAT);
@@ -71,7 +75,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		}
 
 		LBAread(root, 1, vcb->rootLoc);
-		if(root != NULL)
+		if(root == NULL)
 		{
 			perror("FAILED TO LOAD ROOT");
 			free(root);
@@ -94,7 +98,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 			exit(-1);
 		}
     
-        initFAT(numberOfBlocks, 0);
+        initFAT(numberOfBlocks, numberOfBlocks);
 
 		//allocate the memory for the vcb
 		root = malloc(blockSize);
@@ -108,7 +112,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		// step 4 of milestone 1
 		// Create the root directory
 		root = createDirectory(6, NULL); // 0 for now as we are not handling files yet
-
+	
 		// initialize the values in the volume control block
 		vcb->totalBlocks = numberOfBlocks;
 		vcb->blockSize = blockSize;
@@ -116,11 +120,13 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		vcb->fatSize = numberOfBlocks - 1; 
 		vcb->rootLoc = root->blockPos; 
 		vcb->signature = signature;
-		strcpy(vcb->sysType,"File Allocation Table");
+		strcpy(vcb->sysType,"The Gunners");
 
 		// write the vcb into block 0
 		LBAwrite(vcb, 1, 0);
+
 		LBAwrite(FAT, 1, 1);
+		
 		printf("Finished initializing VCB and FAT!\n");
 	}
 
