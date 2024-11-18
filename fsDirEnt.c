@@ -98,3 +98,34 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
 
     return new;
 }
+
+// true if it is a directory and false if not
+boolean isDir(dir_Entry * entry){
+if(entry.is_Directory == 1)
+{
+    return true;
+}
+else
+{
+    return false;
+}
+}
+
+// TODO:
+// test this function once allocate blocks gives the correct location for the blocks
+// of each dir_Entry
+dir_Entry * loadDir(dir_Entry * entry)
+{
+
+    dir_Entry * newDir = malloc(sizeof(dir_Entry))
+    if(newDir == NULL)
+    {
+        perror("FAILED TO ALLOCATE DIRECTORY");
+        free(newDir);
+        exit(-1);
+    }
+    
+    LBAread(newDir,newDir.size, newDir.blockPos);
+
+    return newDir;
+}
