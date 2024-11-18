@@ -50,28 +50,40 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	vcb = malloc(blockSize);
 	if(vcb == NULL)
 	{
+		printf("Error: Memory allocation for VCB failed!\n"); //debugging	
 		perror("FAILED TO ALLOCATE THE VCB");
 		free(vcb);
 		exit(-1);
 	}
+	else {
+		printf("VCB memory allocated successfully.\n");
+	}
 
 	// read a block into the vcb
+	printf("Calling LBAread to read VBC into memory.\n"); //debugging
 	LBAread(vcb, 1, 0);
+	printf("Completed LBAread for VCB.\n"); //debugging
 
 	// check if the vcb has been initialized if it has proceed to end of init
 	if(vcb->signature == signature)
 	{
 		printf("Volume Control Block Present!\n");
+
+		printf("Calling LBAread to read the FAT.\n"); //debugging
 		LBAread(FAT, 1, 1);
-		if(FAT != NULL)
+		printf("Completed LBAread for FAT.\n"); //debugging
+
+		if(FAT == NULL)
 		{
 			perror("FAILED TO LOAD FAT");
 			free(FAT);
 			exit(-1);
 		}
 
+		printf("Calling LBAread to read the Root Directory\n"); //debugging
 		LBAread(root, 1, vcb->rootLoc);
-		if(root != NULL)
+		printf("Completed LBAread for Root Directory\n"); //debugging
+		if(root == NULL)
 		{
 			perror("FAILED TO LOAD ROOT");
 			free(root);
@@ -97,6 +109,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
         initFAT(numberOfBlocks, 0);
 
 		//allocate the memory for the vcb
+		printf("Allocating memory for the root directory\n"); //debugging
 		root = malloc(blockSize);
 		if(root == NULL)
 		{
@@ -108,7 +121,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		// step 4 of milestone 1
 		// Create the root directory
 		root = createDirectory(6, NULL); // 0 for now as we are not handling files yet
-
+	
 		// initialize the values in the volume control block
 		vcb->totalBlocks = numberOfBlocks;
 		vcb->blockSize = blockSize;
@@ -119,8 +132,14 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		strcpy(vcb->sysType,"File Allocation Table");
 
 		// write the vcb into block 0
+		printf("Writing the VCB to block 0\n"); //debugging
 		LBAwrite(vcb, 1, 0);
+		printf("Finished writing VCB\n"); //debugging
+
+		printf("Writing the FAT to block 1\n"); //debugging
 		LBAwrite(FAT, 1, 1);
+		printf("Finished writing FAT\n"); //debugging
+		
 		printf("Finished initializing VCB and FAT!\n");
 	}
 

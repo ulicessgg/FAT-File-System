@@ -25,40 +25,35 @@
 #include "fsVCB.h"
 
 int initFAT(uint64_t numberOfBlocks, uint64_t last_block_in_file) {
-    if (numberOfBlocks < 1) {
-        return -1;
-    }
+    int bytesNeeded = numberOfBlocks * sizeof(int);
+    int blocksNeeded = (bytesNeeded + last_block_in_file - 1) / last_block_in_file;
 
-    if (numberOfBlocks > vcb->freeBlockCount) {
-        return -1;
-    }
+    //debugging
+    //printf("Calculating blocksNeeded: vcb->blockSize = %1d\n", vcb->blockSize);
 
-    int head = vcb->freeBlockStart;
-    int currentBlock = vcb->freeBlockStart;
-    int nextBlock = FAT[currentBlock];
+    // Sentinel value for VCB
+    FAT[0] = 0xFFFFFFFD;
 
-    //modify the tail of the exsiting file to point at new blocks
-    if (last_block_in_file > 0) {
-        FAT[last_block_in_file] = head;
-    }
-
-    vcb->freeBlockCount--;
-
-    // Traverse and acquire the free space requested
+    // Link free space blocks
     for (int i = 1; i < numberOfBlocks; i++) {
-        currentBlock = nextBlock;
-        nextBlock = FAT[currentBlock];
-        vcb->freeBlockCount--;
+        FAT[i] = i+1;
     }
 
-    // Sentinel value to indicate end of requested free space
-    FAT[currentBlock] = 0xFFFFFFFD;
-    vcb->freeBlockStart = nextBlock;
+    // Sentinel value for FAT storage
+    FAT[blocksNeeded] = 0xFFFFFFFD;
 
-    // Update the FAT table in Volume
-    LBAwrite(FAT, vcb->fatSize, vcb->rootLoc);
+    // Sentinel value for free space storage
+    FAT[numberOfBlocks] = 0xFFFFFFFD;
 
-    return head;
+    int blocksWritten = LBAwrite(FAT, blocksNeeded, 1);
+
+    // Assign VCB initial values
+    vcb->freeBlockCount = numberOfBlocks - blocksNeeded - 1;
+    vcb->fatSize = blocksNeeded;
+    vcb->fatLoc = 1;
+    vcb->freeBlockStart = blocksNeeded + 1;
+
+    return (blocksWritten == -1) ? -1 : 0;
 }
 
 // Function to find and allocate a single free block
