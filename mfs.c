@@ -30,9 +30,22 @@ int fs_mkdir(const char *pathname, mode_t mode) // marco
 int fs_rmdir(const char *pathname); // optional
 
 // Directory iteration functions
-dir_Entry* fs_opendir(const char *pathname)
-{
+dir_Entry* fs_opendir(const char *pathname) {
+    // Validate pathname
+    if (!pathname || strlen(pathname) == 0) {
+        printf("Invalid pathname provided to fs_opendir.\n");
+        return NULL;
+    }
 
+    // Locate directory entry
+    dir_Entry *dir_entry = find_directory_entry(pathname);
+    if (!dir_entry || !dir_entry->is_Directory) {
+        printf("Directory not found or is not a directory.\n");
+        return NULL;
+    }
+
+    // Return directory entry
+    return dir_entry;
 }
 struct fs_diriteminfo *fs_readdir(fdDir *dirp)
 {
@@ -41,7 +54,20 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp)
 
 int fs_closedir(fdDir *dirp)
 {
+   if (!dirp) {
+        printf("Invalid directory pointer passed to fs_closedir.\n");
+        return -1; 
+    }
 
+    // Free memory allocated for `di`
+    if (dirp->di) {
+        free(dirp->di);
+        dirp->di = NULL;
+    }
+
+    free(dirp);
+
+    return 0; 
 }
 
 // Misc directory functions
