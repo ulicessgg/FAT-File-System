@@ -47,7 +47,7 @@ dir_Entry* fs_opendir(const char *pathname) {
     // Return directory entry
     return dir_entry;
 }
-struct fs_diriteminfo *fs_readdir(fdDir *dirp)
+struct fs_diriteminfo *fs_readdir(fdDir *dirp) // prash
 {
 
 }
@@ -75,11 +75,11 @@ char* fs_getcwd(char *pathname, size_t size) // marco
 {
 
 }
-int fs_setcwd(char *pathname)   //linux chdir // ulices
+int fs_setcwd(char *pathname)   //linux chdir // prash
 {
 
 }
-int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // ulices
+int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // prash
 {
 
 }
@@ -90,7 +90,7 @@ int fs_isDir(char * pathname)		//return 1 if directory, 0 otherwise // marco
 
 int fs_delete(char* filename);	//removes a file // optional
 
-int fs_stat(const char *path, struct fs_stat *buf)
+int fs_stat(const char *path, struct fs_stat *buf) // yash
 {
 
 }
