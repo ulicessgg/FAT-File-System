@@ -30,84 +30,85 @@
 int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElement)
 {
 
-// checking to see is paramters passed in are valid
-if(path == null)
-{
-    return -1;
-}
-dir_Entry * start;
-if(strlen(path) == 0)
-{
-    return -1;
-}
-// checking for absolute path
-if(path[0] == '/')
-{
-    // global variables will keep in main program
-    start = rootdir
-}
-// checking for relative path
-else
-{
-    // global variables will keep in main program
-    start == cwd
-}
-
-char* token1;
-char* token2;
-char* savePtr;
-dir_Entry * parent;
-parent = start;
-
-token1 = strtok_r(path,"/", savePtr);
-// the path is only a / meaning a directory
-if(token1 == null)
-{
-
-}
-
-//loop while 
-while(token2 != null)
-{
-    token2 = strtok_r(null, "/", savePtr)
-    int dirIndex = findInDir(parent, token1)
-
-    // gives the parent Dir, index of the element in the parent dir
-    // and the name of that element
-    // token 1 is the last element and we can use this info to do 
-    // what the funciton needs to do
-    if(token2 == null)
-    {
-        * returnParent = parent;
-        * index = dirIndex;
-        * lastElement = token1;
-        return 0;
-    }
-
-    // invalid path 
-    if(dirIndex == -1)
+    // checking to see is paramters passed in are valid
+    if(path == null)
     {
         return -1;
     }
-    // if it is not a directory then there is alredy a
-    // file or invalid path
-    else if(parent[dirIndex].isDir == 0)
+    if(strlen(path) == 0)
     {
-    return -1;
+        return -1;
     }
-    
+    // Creates the start directory of where we 
+    // will be looking
+    dir_Entry * start;
 
-    // with the valid path we load this new directory into memory
-    dir_Entry * newParent = loadDir(&parent[dirIndex]);
-    //freeDIr(parent)
-    // adjusting new staring points
-    parent = newParent;
-    token1 = token2;
-     
+    // checking for absolute path
+    if(path[0] == '/')
+    {
+        // global variables will keep in main program
+        start = rootdir
+    }
+    // checking for relative path
+    else
+    {
+        // global variables will keep in main program
+        start == cwd
+    }
 
+    char* token1;
+    char* token2;
+    char* savePtr;
+    dir_Entry * parent;
+    parent = start;
+
+    token1 = strtok_r(path,"/", savePtr);
+    // the path is only a / meaning a directory
+    if(token1 == null)
+    {
+
+    }
+
+    //loop while 
+    while(token2 != null)
+    {
+        token2 = strtok_r(null, "/", savePtr)
+        int dirIndex = findInDir(parent, token1)
+
+        // gives the parent Dir, index of the element in the parent dir
+        // and the name of that element
+        // token 1 is the last element and we can use this info to do 
+        // what the funciton needs to do
+        if(token2 == null)
+        {
+            * returnParent = parent;
+            * index = dirIndex;
+            * lastElement = token1;
+            return 0;
+        }
+
+        // invalid path 
+        if(dirIndex == -1)
+        {
+            return -1;
+        }
+        // if it is not a directory then there is alredy a
+        // file or invalid path
+        else if(parent[dirIndex].isDir == 0)
+        {
+        return -1;
+        }
+        
+
+        // with the valid path we load this new directory into memory
+        dir_Entry * newParent = loadDir(&parent[dirIndex]);
+        //freeDIr(parent)
+        // adjusting new staring points
+        parent = newParent;
+        token1 = token2;
+    }
 
 }
-
 
 // iterates through the directory 
 int findInDir(dir_Entry * parent, char * token)
