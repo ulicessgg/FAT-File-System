@@ -25,6 +25,7 @@
 #include "mfs.h"
 #include "fsFAT.h"	// ensure this is always present!
 #include "fsVCB.h"
+#include "fsDirEnt.h"
 
 
 int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElement)
@@ -39,8 +40,8 @@ int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElem
     {
         return -1;
     }
-    // Creates the start directory of where we 
-    // will be looking
+    // Creates the start directory of where 
+    // we will be searching through
     dir_Entry * start;
 
     // checking for absolute path
@@ -63,10 +64,14 @@ int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElem
     parent = start;
 
     token1 = strtok_r(path,"/", savePtr);
-    // the path is only a / meaning a directory
+    // Special case: the path given is only a "/"
+    // meaning a directory
     if(token1 == null)
     {
-
+         * returnParent = parent;
+            * index = 0;
+            * lastElement = null;
+            return 0;
     }
 
     //loop while 
@@ -110,8 +115,27 @@ int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElem
 
 }
 
-// iterates through the directory 
-int findInDir(dir_Entry * parent, char * token)
+// iterates through the directory and tell us the index of the directory if the name is found
+// if the name is not found in the parent dir then return -1
+int findInDir(dir_Entry * parent, char * name)
 {
+    if(parent == NULL){
+        return -1;
+    }
+    if(name == NULL){
+        return -1;
+    }
 
+    int numOfEntries = (parent[0].size / sizeof(dir_Entry));
+
+    for(int x=0; x < numOfEntries; x++)
+    {
+        // could create a function that checks if a dir is used or not and use that to
+        // bring down the number of directores checked
+        if(strcmp(paret[x].name, name) == 0)
+        {
+            return x;
+        }
+    }
+    return -1;
 }
