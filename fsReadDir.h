@@ -1,0 +1,3 @@
+// helper function, here's the directory entry i want to load, i need to allocate size and round it up to the next block size and call helper funciton in fat to read chain
+// start from beginning, read HEAD from block 0 to block n and the buffer. this will go block by block loading each of the blocks into your buffer (the directory)
+// remember to increment the pointer when loading blocks so that we don't keep loading into the same spot in memory
