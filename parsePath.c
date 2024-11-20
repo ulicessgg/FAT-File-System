@@ -32,7 +32,7 @@ int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElem
 {
 
     // checking to see is paramters passed in are valid
-    if(path == null)
+    if(path == NULL)
     {
         return -1;
     }
@@ -48,13 +48,13 @@ int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElem
     if(path[0] == '/')
     {
         // global variables will keep in main program
-        start = rootdir
+        start = root;
     }
     // checking for relative path
     else
     {
         // global variables will keep in main program
-        start == cwd
+        start == cwd;
     }
 
     char* token1;
@@ -68,10 +68,10 @@ int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElem
     // meaning a directory
     if(token1 == null)
     {
-         * returnParent = parent;
-            * index = 0;
-            * lastElement = null;
-            return 0;
+         returnParent = parent;
+         index = 0;
+         lastElement = null;
+         return 0;
     }
 
     //loop while 
