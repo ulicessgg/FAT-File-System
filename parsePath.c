@@ -75,7 +75,7 @@ int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElem
     }
 
     //loop while 
-    while(token2 != null)
+    while(token2 != NULL)
     {
         token2 = strtok_r(null, "/", savePtr)
         int dirIndex = findInDir(parent, token1)
@@ -86,9 +86,9 @@ int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElem
         // what the funciton needs to do
         if(token2 == null)
         {
-            * returnParent = parent;
-            * index = dirIndex;
-            * lastElement = token1;
+             returnParent = parent;
+             index = dirIndex;
+             lastElement = token1;
             return 0;
         }
 
