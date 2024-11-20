@@ -13,6 +13,9 @@
 *
 **************************************************************/
 
+// add helper functions: for lbaread, lbawrite, extend, and trim
+// root directory, how many blocks to write to disk, and buffer i will copy from
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -56,18 +59,6 @@ int initFAT(uint64_t numBlocks, uint64_t lastBlock) {
     return 0;
 }
 
-// Function to find and allocate a single free block
-int allocateBlock() {
-    int block = 01;
-    for (uint64_t i = 2; i < vcb->totalBlocks; i++) {
-        if (FAT[i] == 1) { // Block is free
-            FAT[i] = 2;    // Mark block as EOF if it's single block allocation
-            vcb->freeBlockCount--;  // Update dree block count in VCB
-            return i;
-        }
-    }
-    return -1;
-}
 
 // Function to allocate multiple blocks for a file, returns starting block index
 int allocateBlocks(uint64_t blockCount, uint64_t blockSize) {
@@ -89,4 +80,80 @@ int allocateBlocks(uint64_t blockCount, uint64_t blockSize) {
 
 	FAT[prevBlock] = -1; // Mark EOF chain
 	return startBlock; // Return the starting block
+}
+
+// Function to find and allocate a single free block
+int allocateBlock() {
+    int block = 01;
+    for (uint64_t i = 2; i < vcb->totalBlocks; i++) {
+        if (FAT[i] == 1) { // Block is free
+            FAT[i] = 2;    // Mark block as EOF if it's single block allocation
+            vcb->freeBlockCount--;  // Update dree block count in VCB
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Helper function for LBAread
+int readBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer) {
+    if (numBlocks == 0 || buffer == NULL) {
+        return -1; // Invalid input
+    }
+ 
+    uint64_t currentBlock = rootBlock;
+    uint64_t blocksRead = 0;
+    uint64_t bufferOffset = 0;
+
+    while (blocksRead < numBlocks) {
+        // Read a single block into the buffer at the correct offset
+        uint64_t bytesRead = LBAread((char*)buffer + bufferOffset, 1, currentBlock);
+        if (bytesRead != 1) {
+            return -2; // Error during read
+        }
+
+        // Move to the next block in the FAT
+        currentBlock = FAT[currentBlock];
+        if (currentBlock == 0) {
+            return -3; // End of chain reached prematurely
+        }
+
+        blocksRead++;
+        bufferOffset += vcb->blockSize; 
+    }
+
+    return 0; // Success
+}
+
+// Helper function for LBAwrite
+int writeBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer) {
+    if (numBlocks == 0 || buffer == NULL) {
+        return -1; // Invalid input
+    }
+
+    uint64_t currentBlock = rootBlock;
+    uint64_t blocksWritten = 0;
+    uint64_t bufferOffset = 0;
+
+    while (blocksWritten < numBlocks) {
+        // Write a single block from the buffer at the correct offset
+        uint64_t bytesWritten = LBAwrite((char*)buffer + bufferOffset, 1, currentBlock);
+        if (bytesWritten != 1) {
+            return -2; // Error during write
+        }
+
+        // Move to the next block in the FAT or allocate a new block
+        if (FAT[currentBlock] == 0) { // End of chain
+            FAT[currentBlock] = allocateBlock(); // Allocate a new block
+            if (FAT[currentBlock] == -1) {
+                return -3; // Allocation failed
+            }
+        }
+
+        currentBlock = FAT[currentBlock];
+        blocksWritten++;
+        bufferOffset += vcb->blockSize; // Advance buffer offset by block size
+    }
+
+    return 0; // Success
 }

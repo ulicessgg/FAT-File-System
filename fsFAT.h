@@ -20,8 +20,10 @@ typedef uint64_t uint64_t;
 
 extern int* FAT;
 
-int initFAT(uint64_t numBlocks, uint64_t lastBlock);
-int allocateBlock();
-int allocateBlocks(uint64_t blockCount, uint64_t blockSize);
+int initFAT(uint64_t numBlocks, uint64_t lastBlock); // function to initialize the FAT
+int allocateBlocks(uint64_t blockCount, uint64_t blockSize); // function to allocate blocks in memory
+int allocateBlock(); // helper function for allocateBlocks to allocate a single block
+int readBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer); // helper function for FAT
+int writeBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer); // helper function for FAT
 
 #endif
