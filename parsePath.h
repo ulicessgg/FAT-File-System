@@ -14,17 +14,11 @@
 #ifndef PARSEPATH_H
 #define PARSEPATH_H
 
-#include "fsDirEnt.h"
-#include "fsLow.h"
-#include "mfs.h"
-#include "fsFAT.h"	// ensure this is always present!
-#include "fsVCB.h"
 
-
-extern dir_Entry *root
+extern dir_Entry *root;
 
 // Function prototypes
-int parsePath(char *path, dir_Entry *returnParent, int *index, char **lastElement);
+int parsePath(char *path, dir_Entry **returnParent, int **index, char **lastElement);
 int findInDir(dir_Entry *parent, char *name);
 
 #endif 
