@@ -15,7 +15,6 @@
 *
 **************************************************************/
 
-
 #ifndef _MFS_H
 #define _MFS_H
 #include <sys/types.h>
@@ -29,6 +28,7 @@
 #define FT_REGFILE	DT_REG
 #define FT_DIRECTORY DT_DIR
 #define FT_LINK	DT_LNK
+#define MAX_PATH_LENGTH 256 // Define maximum path length
 
 extern dir_Entry* root;
 extern dir_Entry* cwd;
@@ -38,6 +38,9 @@ typedef u_int64_t uint64_t;
 #endif
 #ifndef uint32_t
 typedef u_int32_t uint32_t;
+#endif
+#ifndef blksize_t
+typedef blksize_t blksize_t;
 #endif
 
 // This structure is returned by fs_readdir to provide the caller with information

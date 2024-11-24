@@ -14,12 +14,19 @@
 *	your filesystem.
 *
 **************************************************************/
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <time.h>
 #include "b_io.h"
 #include "fsDirEnt.h"
 #include "mfs.h"
+#include "fsLow.h" // Assuming this contains low-level filesystem utilities
+
+// Global variable to track the current working directory
+static char currentWorkingDir[MAX_PATH_LENGTH] = "/";
 
 // Key directory functions
 int fs_mkdir(const char *pathname, mode_t mode) // marco
@@ -75,14 +82,37 @@ char* fs_getcwd(char *pathname, size_t size) // marco
 {
 
 }
+
 int fs_setcwd(char *pathname)   //linux chdir // prash
 {
+    if (pathname == NULL || strlen(pathname) == 0) {
+        fprintf(stderr, "Error: Invalid pathname\n");
+        return -1;
+    }
 
+    // Check if the given pathname is a directory
+    if (!fs_isDir(pathname)) {
+        fprintf(stderr, "Error: Path is not a directory\n");
+        return -1;
+    }
+
+    // Update the current working directory
+    if (strlen(pathname) >= MAX_PATH_LENGTH) {
+        fprintf(stderr, "Error: Path exceeds maximum length\n");
+        return -1;
+    }
+
+    strncpy(currentWorkingDir, pathname, MAX_PATH_LENGTH - 1);
+    currentWorkingDir[MAX_PATH_LENGTH - 1] = '\0'; // Ensure null-termination
+
+    return 0; // Success
 }
+
 int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // prash
 {
 
 }
+
 int fs_isDir(char * pathname)		//return 1 if directory, 0 otherwise // marco
 {
 
