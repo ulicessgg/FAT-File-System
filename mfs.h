@@ -57,14 +57,12 @@ struct fs_diriteminfo
 // from a directory.  This structure helps you (the file system) keep track of
 // which directory entry you are currently processing so that everytime the caller
 // calls the function readdir, you give the next entry in the directory
-typedef struct
-	{
-	/*****TO DO:  Fill in this structure with what your open/read directory needs  *****/
-	unsigned short  d_reclen;		/* length of this record */
-	unsigned short	dirEntryPosition;	/* which directory entry position, like file pos */
-	//DE *	directory;			/* Pointer to the loaded directory you want to iterate */
-	struct fs_diriteminfo * di;		/* Pointer to the structure you return from read */
-	} fdDir;
+// Struct representing an open directory
+typedef struct fdDir {
+    int currentEntry;            /* Current entry index */
+    int totalEntries;            /* Total number of entries in the directory */
+    struct fs_diriteminfo *entries; /* Array of directory entries */
+} fdDir;
 
 // Key directory functions
 int fs_mkdir(const char *pathname, mode_t mode);

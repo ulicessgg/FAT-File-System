@@ -37,23 +37,43 @@ int fs_mkdir(const char *pathname, mode_t mode) // marco
 int fs_rmdir(const char *pathname); // optional
 
 // Directory iteration functions
-dir_Entry* fs_opendir(const char *pathname) {
-    // Validate pathname
-    if (!pathname || strlen(pathname) == 0) {
-        printf("Invalid pathname provided to fs_opendir.\n");
+fdDir* fs_opendir(const char *pathname)
+{
+    if (pathname == NULL || strlen(pathname) == 0)
+    {
+        fprintf(stderr, "Error: Invalid pathname\n");
         return NULL;
     }
 
-    // Locate directory entry
-    dir_Entry *dir_entry = find_directory_entry(pathname);
-    if (!dir_entry || !dir_entry->is_Directory) {
-        printf("Directory not found or is not a directory.\n");
+    // Check if the pathname is a directory
+    if (!fs_isDir(pathname))
+    {
+        fprintf(stderr, "Error: Path is not a directory\n");
         return NULL;
     }
 
-    // Return directory entry
-    return dir_entry;
+    int entryCount = 0;
+    struct fs_diriteminfo *entries = fs_getDirEntries(pathname, &entryCount);
+    if (entries == NULL || entryCount == 0)
+    {
+        fprintf(stderr, "Error: Failed to read directory entries\n");
+        return NULL;
+    }
+
+    fdDir *dirp = (fdDir *)malloc(sizeof(fdDir));
+    if (dirp == NULL)
+    {
+        fprintf(stderr, "Error: Memory allocation failed\n");
+        return NULL;
+    }
+
+    dirp->currentEntry = 0;
+    dirp->totalEntries = entryCount;
+    dirp->entries = entries;
+
+    return dirp;
 }
+
 struct fs_diriteminfo *fs_readdir(fdDir *dirp) // prash
 {
 
@@ -61,20 +81,16 @@ struct fs_diriteminfo *fs_readdir(fdDir *dirp) // prash
 
 int fs_closedir(fdDir *dirp)
 {
-   if (!dirp) {
-        printf("Invalid directory pointer passed to fs_closedir.\n");
-        return -1; 
+    if (dirp == NULL)
+    {
+        fprintf(stderr, "Error: Invalid directory pointer\n");
+        return -1;
     }
 
-    // Free memory allocated for `di`
-    if (dirp->di) {
-        free(dirp->di);
-        dirp->di = NULL;
-    }
-
+    free(dirp->entries);
     free(dirp);
 
-    return 0; 
+    return 0;
 }
 
 // Misc directory functions
