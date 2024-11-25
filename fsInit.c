@@ -130,6 +130,8 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		LBAwrite(FAT, 1, 1);
 		
 		printf("Finished initializing VCB and FAT!\n");
+
+		
 	}
 
 	return 0;

@@ -23,10 +23,13 @@
 #include "b_io.h"
 #include "fsDirEnt.h"
 #include "mfs.h"
+#include "parsePath.h"
 #include "fsLow.h" // Assuming this contains low-level filesystem utilities
 
 // Global variable to track the current working directory
 static char currentWorkingDir[MAX_PATH_LENGTH] = "/";
+dir_Entry * root;
+dir_Entry * cwd;
 
 // Key directory functions
 int fs_mkdir(const char *pathname, mode_t mode) // marco
@@ -131,6 +134,21 @@ int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // prash
 
 int fs_isDir(char * pathname)		//return 1 if directory, 0 otherwise // marco
 {
+
+    if(pathname[0] == NULL || (strlen(pathname) == 0))
+    {
+        return -1;
+    }
+
+    dir_Entry * entry = NULL;
+    int * index = -1;
+    char * lastElement = "not here";
+
+    int returnVal = parsePath(pathname, &entry, &index, &lastElement);
+    //debugging
+    printf("Path Name: %s\nReturn val: %d\nIndex: %d\nLast Elem: %s",pathname,returnVal, index, lastElement);
+
+return returnVal;
 
 }
 
