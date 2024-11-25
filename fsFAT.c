@@ -27,36 +27,114 @@
 #include "fsFAT.h"	// ensure this is always present!
 #include "fsVCB.h"
 
-int initFAT(uint64_t numBlocks, uint64_t lastBlock) {
+#define FAT_RESERVED 0xBE1355
+#define FAT_FREE 0
+#define FAT_EOF -1
+
+int initFAT(uint64_t numBlocks, uint64_t blockSize) {
     int requiredBytes = numBlocks * sizeof(int);
-    int blocksOccupied = (requiredBytes + lastBlock - 1) / lastBlock;
+    int blocksOccupied = (requiredBytes + blockSize - 1) / blockSize;
+    int lastFreeBlock = numBlocks - 2;
 
-    //debugging
-    //printf("Calculating blocksNeeded: vcb->blockSize = %1d\n", vcb->blockSize);
-
-    // Set the link values 
-    for (int i = 0; i < numBlocks; i++) {
-        if (i == 0 || i == blocksOccupied || i == numBlocks) {
-            FAT[i] = 0xBE1355;
+    // Initialize FAT and free-space chain
+    for (uint64_t i = 0; i < numBlocks; i++) {
+        if (i < blocksOccupied) {
+            FAT[i] = FAT_RESERVED; // Reserved for system use
+        } else if (i == lastFreeBlock) {
+            FAT[i] = FAT_EOF; // Mark the last free block as EOF
+        } else if (i == numBlocks - 1) {
+            FAT[i] = FAT_RESERVED; // Mark the final block as reserved
+        } else {
+            FAT[i] = i + 1; // Link free blocks in a chain
         }
-        else {
-            FAT[i] = i+1;
+
+        if (FAT[i] != FAT_RESERVED && FAT[i] != FAT_EOF && (FAT[i] < 0 || FAT[i] > numBlocks)){
+            FAT[i] = FAT_FREE;
         }
     }
 
-    // update the vcb with fat info
+    // Update VCB
     vcb->freeBlockCount = numBlocks - blocksOccupied - 1;
     vcb->fatSize = blocksOccupied;
     vcb->fatLoc = 1;
-    vcb->freeBlockStart = blocksOccupied + 1;
+    vcb->freeBlockStart = blocksOccupied;
 
-    // Write FAT to disk and check for errors
-    if (LBAwrite(FAT, blocksOccupied, 1) == -1)
-    {
+    // Write FAT to disk
+    if (LBAwrite(FAT, vcb->fatSize, vcb->fatLoc) == -1) {
+        fprintf(stderr, "Error: Failed to write FAT to disk.\n");
         return -1;
     }
 
-    return 0;
+    int written = LBAwrite(FAT, vcb->fatSize, vcb->fatLoc);
+    printf("FAT written to disk: %d blocks\n", written);
+    if (written != vcb->fatSize) {
+        fprintf(stderr, "Error writing FAT to disk]\n");
+    }
+
+    // debugging
+    printf("freeBlockCount: %u\n", vcb->freeBlockCount);
+    printf("numBlocks: %lu\n", numBlocks);
+    printf("blocksOccupied: %u\n", blocksOccupied);
+
+    for (uint64_t i=0; i<numBlocks; i++) {
+        if (FAT[i] != FAT_RESERVED && FAT[i] != FAT_EOF && FAT[i] != i + 1) {
+            FAT[i] = FAT_FREE; // Mark unlinked blocks as free
+        }
+    }
+
+    // debugging
+    printf("freeBlockCount: %u\n", vcb->freeBlockCount);
+    printf("numBlocks: %lu\n", numBlocks);
+    printf("blocksOccupied: %d\n", blocksOccupied);
+    printf("Last free block: %lu, FAT[%lu] = %d\n",
+           (unsigned long)lastFreeBlock, (unsigned long)lastFreeBlock, FAT[lastFreeBlock]);
+
+
+    return 0; // Success
+}
+
+void verifyFreeSpaceChain() { // used for debugging
+    uint64_t current = vcb->freeBlockStart;
+    uint64_t freeCount = 0;
+
+    printf("Verifying Free-Space Chain:\n");
+    while (current != FAT_EOF) {
+        printf("Block %lu -> %u\n", current, FAT[current]);
+        freeCount++;
+        if (freeCount > vcb->freeBlockCount) {
+            fprintf(stderr, "Error: Free-space chain exceeds expected count.\n");
+            return;
+        }
+        current = FAT[current];
+    }
+
+    printf("Verified free-space chain ends correctly at block %lu.\n", current);
+    if (freeCount != vcb->freeBlockCount) {
+        fprintf(stderr, "Mismatch: Free block count (%lu) does not match VCB (%u).\n", freeCount, vcb->freeBlockCount);
+    } else {
+        printf("Free block count matches: %lu.\n", freeCount);
+    }
+}
+
+
+
+void debugPrintFAT() { // used for debugging
+    printf("FAT Contents:\n");
+    for(uint64_t i=0; i<vcb->totalBlocks; i++) {
+        printf("FAT[%lu]=%d\n", i, FAT[i]);
+    }
+    printf("Free Block Start: %u\n", vcb->freeBlockStart);
+    printf("Free Block Count: %u\n", vcb->freeBlockCount);
+}
+
+void debugFreeSpaceChain() { // used for debugging
+    uint64_t current = vcb->freeBlockStart;
+    printf("Free-Space Chain:\n");
+    while (current != FAT_EOF) {
+        printf("Block %lu -> %u\n", current, FAT[current]);
+        current = FAT[current];
+    }
+    printf("End of free-space chain at block %lu\n", current);
 }
 
 

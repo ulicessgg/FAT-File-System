@@ -25,5 +25,7 @@ int allocateBlocks(uint64_t blockCount, uint64_t blockSize); // function to allo
 int allocateBlock(); // helper function for allocateBlocks to allocate a single block
 int readBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer); // helper function for FAT
 int writeBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer); // helper function for FAT
+void debugPrintFAT(); // used for debugging
+void verifyFreeSpaceChain(); // used for debugging
 
 #endif

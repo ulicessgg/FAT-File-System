@@ -99,6 +99,8 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		}
     
         initFAT(numberOfBlocks, numberOfBlocks);
+		debugPrintFAT(); // debugging
+		
 
 		//allocate the memory for the vcb
 		root = malloc(blockSize);
