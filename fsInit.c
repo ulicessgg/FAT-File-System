@@ -40,6 +40,7 @@ uint64_t signature = 314159265358979323;
 volumeControlBlock* vcb;
 int* FAT;
 dir_Entry* root;
+dir_Entry* cwd;
 
 // step 1 in milestone 1
 int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)

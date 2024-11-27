@@ -28,8 +28,6 @@
 
 // Global variable to track the current working directory
 static char currentWorkingDir[MAX_PATH_LENGTH] = "/";
-dir_Entry * root;
-dir_Entry * cwd;
 
 // Key directory functions
 int fs_mkdir(const char *pathname, mode_t mode) // marco
@@ -37,26 +35,30 @@ int fs_mkdir(const char *pathname, mode_t mode) // marco
     
 }
 
-int fs_rmdir(const char *pathname); // optional
+// int fs_rmdir(const char *pathname); // optional
 
 // Directory iteration functions
 fdDir* fs_opendir(const char *pathname)
 {
-    if (pathname == NULL || strlen(pathname) == 0)
+    if ((char *)pathname == NULL || strlen((char *)pathname) == 0)
     {
         fprintf(stderr, "Error: Invalid pathname\n");
         return NULL;
     }
 
     // Check if the pathname is a directory
-    if (!fs_isDir(pathname))
+    if (!fs_isDir((char *)pathname))
     {
         fprintf(stderr, "Error: Path is not a directory\n");
         return NULL;
     }
 
     int entryCount = 0;
-    struct fs_diriteminfo *entries = fs_getDirEntries(pathname, &entryCount);
+    
+    // i commented this out since it brings up an error when calling the helper
+    // unsure if it is provided to us or if it has to be made but as of now it 
+    // throws an error when testing the shell - ulices
+    struct fs_diriteminfo *entries /* = fs_getDirEntries((char *)pathname, &entryCount) */;
     if (entries == NULL || entryCount == 0)
     {
         fprintf(stderr, "Error: Failed to read directory entries\n");
@@ -127,34 +129,69 @@ int fs_setcwd(char *pathname)   //linux chdir // prash
     return 0; // Success
 }
 
-int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // prash
+int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // ulices
 {
-
-}
-
-int fs_isDir(char * pathname)		//return 1 if directory, 0 otherwise // marco
-{
-
-    if(pathname[0] == NULL || (strlen(pathname) == 0))
+    if(filename == NULL || (strlen(filename) == 0))
     {
         return -1;
     }
 
     dir_Entry * entry = NULL;
-    int * index = -1;
+    // temp fix for comparison warning thrown by terminal
+    int ind = 1;
+    int * index = &ind;
+    char * lastElement = "not here";
+
+    int returnVal = parsePath(filename, &entry, &index, &lastElement);
+
+    //printf("Path Name: %s\nReturn val: %d\nIndex: %d\nLast Elem: %s",pathname,returnVal, index, lastElement);
+
+    dir_Entry* currEnt;
+    LBAread(currEnt, 1, returnVal);
+
+    if(currEnt->is_Directory == 0)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+int fs_isDir(char * pathname)		//return 1 if directory, 0 otherwise // marco
+{
+    if(pathname == NULL || (strlen(pathname) == 0))
+    {
+        return -1;
+    }
+
+    dir_Entry * entry = NULL;
+    // temp fix for comparison warning thrown by terminal
+    int ind = 1;
+    int * index = &ind;
     char * lastElement = "not here";
 
     int returnVal = parsePath(pathname, &entry, &index, &lastElement);
-    //debugging
-    printf("Path Name: %s\nReturn val: %d\nIndex: %d\nLast Elem: %s",pathname,returnVal, index, lastElement);
 
-return returnVal;
+    //printf("Path Name: %s\nReturn val: %d\nIndex: %d\nLast Elem: %s",pathname,returnVal, index, lastElement);
 
+    dir_Entry* currEnt;
+    LBAread(currEnt, 1, returnVal);
+
+    if(currEnt->is_Directory == 1)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
 
-int fs_delete(char* filename);	//removes a file // optional
+// int fs_delete(char* filename);	//removes a file // optional
 
-int fs_stat(const char *path, struct fs_stat *buf) // yash
+int fs_stat(const char *path, struct fs_stat *buf) // prash
 {
 
 }

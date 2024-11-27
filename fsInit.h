@@ -21,8 +21,6 @@
 #include "fsVCB.h"
 #include "fsInit.h"
 
-extern dir_Entry *root
-
 // Function prototypes
 int parsePath(char * path, dir_Entry * returnParent, int index, char ** lastElement)
 
