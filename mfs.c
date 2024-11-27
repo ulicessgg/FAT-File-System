@@ -35,7 +35,10 @@ int fs_mkdir(const char *pathname, mode_t mode) // marco
     
 }
 
-// int fs_rmdir(const char *pathname); // optional
+int fs_rmdir(const char *pathname)
+{
+
+}
 
 // Directory iteration functions
 fdDir* fs_opendir(const char *pathname)
@@ -79,7 +82,7 @@ fdDir* fs_opendir(const char *pathname)
     return dirp;
 }
 
-struct fs_diriteminfo *fs_readdir(fdDir *dirp) // prash
+struct fs_diriteminfo *fs_readdir(fdDir *dirp) // prash or yash
 {
 
 }
@@ -189,7 +192,10 @@ int fs_isDir(char * pathname)		//return 1 if directory, 0 otherwise // marco
     }
 }
 
-// int fs_delete(char* filename);	//removes a file // optional
+int fs_delete(char* filename)	//removes a file
+{
+
+}
 
 int fs_stat(const char *path, struct fs_stat *buf) // prash
 {
