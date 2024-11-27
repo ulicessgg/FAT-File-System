@@ -66,8 +66,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 	if(vcb->signature == signature)
 	{
 		printf("Volume Control Block Present!\n");
-		LBAread(FAT, 1, 1);
-
+		LBAread(FAT, vcb->fatSize, vcb->fatLoc);
 		if(FAT == NULL)
 		{
 			perror("FAILED TO LOAD FAT");
