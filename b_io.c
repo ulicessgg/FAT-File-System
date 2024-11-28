@@ -248,6 +248,18 @@ int b_read (b_io_fd fd, char * buffer, int count)
 		// adjust part3 by the number of bytes copied in chunks
 		part3 = part3 - part2;
 	}
+
+	if(part1 > 0) // memcpy part 1
+	{
+		memcpy(buffer, fcbArray[fd].buffer + fcbArray[fd].index, part1);
+		fcbArray[fd].index = fcbArray[fd].index - part1;
+	}
+	if(part2 > 0) // copy directly to user buffer
+	{
+		bytesRead = LBAread(buffer + part1, blocksToCopy, fcbArray[fd].blockPosition + fcbArray[fd].fi->blockPos);
+		fcbArray[fd].blockPosition += blocksToCopy;
+		part2 = bytesRead * B_CHUNK_SIZE;
+	}
 		
 	return bytesCopied; // changed it
 }
