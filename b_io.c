@@ -32,15 +32,14 @@
 typedef struct b_fcb
 {
 	/** TODO add al the information you need in the file control block **/
-	dir_Entry* currFileInfo; // directory entry info for current file
-	dir_Entry* parentDirInfo; // directory entry info for parent directory
+	dir_Entry* fi; // directory entry info for current file
+	dir_Entry* pi; // directory entry info for parent directory
 	char * buffer;		//holds the open file buffer
 	int index;		//holds the current position in the buffer 
-	int buflen;		//holds how many valid bytes are in the buffer
-	int bytePosition; // holds the position in bytes in the buffer
+	int bufferUsed;		//holds how many valid bytes are in the buffer
 	int blockPosition; // holds the begining block poisiton
 	int dirPosition; // holds position in the parent directory
-	int size; // holds the total blocks taken up by file
+	int totalBlocks; // holds the total blocks taken up by file
 	int flags; // holds flags modifiying file actions
 } b_fcb;
 	
@@ -51,16 +50,17 @@ int startup = 0;	//Indicates that this has not been initialized
 //Method to initialize our file system
 void b_init ()
 {
-	// return if already initialized
-	if(startup)
+	if(startup > 0) // already initialized
 	{
 		return;
 	}
-	
-	//init fcbArray to all free
+
 	for (int i = 0; i < MAXFCBS; i++)
 	{
-		fcbArray[i].currFileInfo = NULL; //indicates a free fcbArray
+		//indicates a free fcbArray
+		fcbArray[i].fi = NULL;
+		fcbArray[i].pi = NULL;
+		fcbArray[i].buffer = NULL;
 	}
 		
 	startup = 1;
@@ -72,9 +72,10 @@ b_io_fd b_getFCB ()
 	for (int i = 0; i < MAXFCBS; i++)
 	{
 		if (fcbArray[i].buffer == NULL)
-			{
-				return i;		//Not thread safe (But do not worry about it for this assignment)
-			}
+		{
+			fcbArray[i].fi = (dir_Entry*) -2;
+			return i;		//Not thread safe (But do not worry about it for this assignment)
+		}
 	}
 
 	return (-1);  //all in use
@@ -95,21 +96,49 @@ b_io_fd b_open (char * filename, int flags)
 	//
 	//
 		
-	if (startup == 0) b_init();  //Initialize our system
+	if (startup == 0)  //Initialize our system
+	{
+		b_init();
+	}
 	
-	fd = b_getFCB();				// get our own file descriptor
-										// check for error - all used FCB's
+	// create file descriptor using return value of b_getFCB
+	b_io_fd fd = b_getFCB();
+	// if b_getFCB returns -1 return a negative
+	if(fd < 0)
+	{
+		return -2;
+	}
 
-	if(fd == -1)
+	// save the file info returned from GetFileInfo
+	fcbArray[fd].fi = GetFileInfo(filename); // function does not exist so i will use parse path
+	// if GetFileInfo returns null return a negative
+	if(fcbArray[fd].fi == NULL)
 	{
 		return -1;
 	}
 
-	fcbArray[fd].currFileInfo = GetFileInfo(filename);
-	
-	return (fd);						// all set
+	// allocate buffer for respective file being opened
+	fcbArray[fd].buffer = malloc(B_CHUNK_SIZE);
+	// return a negative if the allocation fails
+	if(fcbArray[fd].buffer == NULL)
+	{
+		return -999;
+	}
+
+	// clear the fcbArray members before read
+	fcbArray[fd].index = 0;
+	fcbArray[fd].bufferUsed = 0;
+	fcbArray[fd].blockPosition = 0;
+	fcbArray[fd].dirPosition = fcbArray[fd].fi->blockPos;
+	fcbArray[fd].totalBlocks = (fcbArray[fd].fi->size + (B_CHUNK_SIZE - 1)) 
+							   / B_CHUNK_SIZE;
+	// set the flags for the current file
+	fcbArray[fd].flags = flags;
+
+	return fd;
 }
 
+// if time allows this will be done after write due to lower priority
 
 // Interface to seek function	
 int b_seek (b_io_fd fd, off_t offset, int whence)
@@ -121,7 +150,6 @@ int b_seek (b_io_fd fd, off_t offset, int whence)
 	{
 		return (-1); 					//invalid file descriptor
 	}
-		
 		
 	return (0); //Change this
 }
