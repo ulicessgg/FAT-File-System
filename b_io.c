@@ -260,6 +260,29 @@ int b_read (b_io_fd fd, char * buffer, int count)
 		fcbArray[fd].blockPosition += blocksToCopy;
 		part2 = bytesRead * B_CHUNK_SIZE;
 	}
+	if(part3 > 0) // refill buffer to copy more
+	{
+		bytesRead = LBAread(fcbArray[fd].buffer, 1, fcbArray[fd].blockPosition + fcbArray[fd].fi->blockPos);
+		bytesRead = bytesRead * B_CHUNK_SIZE;
+
+		fcbArray[fd].blockPosition += 1;
+
+		// reset the offset and buffer length
+		fcbArray[fd].index = 0;
+		fcbArray[fd].bufferUsed = bytesRead; // actual bytes in buffer
+
+		if(bytesRead < part3) // not enough for request
+		{
+			part3 = bytesRead;
+		}
+		if(part3 > 0)
+		{
+			memcpy(buffer + part1 + part2, fcbArray[fd].buffer + fcbArray[fd].index, part3);
+			fcbArray[fd].index = fcbArray[fd].index + part3; // adjust for copied bytes
+		}
+	}
+
+	bytesCopied = part1 + part2 + part3;
 		
 	return bytesCopied; // changed it
 }
