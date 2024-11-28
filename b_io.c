@@ -33,7 +33,6 @@ typedef struct b_fcb
 {
 	/** TODO add al the information you need in the file control block **/
 	dir_Entry* fi; // directory entry info for current file
-	dir_Entry* pi; // directory entry info for parent directory
 	char * buffer;		//holds the open file buffer
 	int index;		//holds the current position in the buffer 
 	int bufferUsed;		//holds how many valid bytes are in the buffer
@@ -58,8 +57,6 @@ void b_init ()
 	for (int i = 0; i < MAXFCBS; i++)
 	{
 		//indicates a free fcbArray
-		fcbArray[i].fi = NULL;
-		fcbArray[i].pi = NULL;
 		fcbArray[i].buffer = NULL;
 	}
 		
@@ -155,20 +152,17 @@ int b_seek (b_io_fd fd, off_t offset, int whence)
 }
 
 
-
+// to be done after read is finished as this will take longest time
 // Interface to write function	
 int b_write (b_io_fd fd, char * buffer, int count)
 {
-	
-
 	if (startup == 0) b_init();  //Initialize our system
 
 	// check that fd is between 0 and (MAXFCBS-1)
 	if ((fd < 0) || (fd >= MAXFCBS))
-		{
+	{
 		return (-1); 					//invalid file descriptor
-		}
-		
+	}
 		
 	return (0); //Change this
 }
@@ -211,22 +205,17 @@ int b_read (b_io_fd fd, char * buffer, int count)
 // Interface to Close the file	
 int b_close (b_io_fd fd)
 {
-	// deallocate fileinfo, parent info, and buffer for respective file
-	free(fcbArray[fd].currFileInfo);
-	free(fcbArray[fd].parentDirInfo);
+	// deallocate fileinfo and buffer for respective file
+	free(fcbArray[fd].fi);
 	free(fcbArray[fd].buffer);
 
-	// reset fcbArray values as they are no longer in use
-	fcbArray[fd].currFileInfo == NULL;
-	fcbArray[fd].parentDirInfo == NULL;
-	fcbArray[fd].buffer == NULL;
-	fcbArray[fd].index = 0;	 
-	fcbArray[fd].buflen = 0;	 
-	fcbArray[fd].bytePosition = 0;	 
-	fcbArray[fd].blockPosition = 0;	 
-	fcbArray[fd].dirPosition = 0;	  
-	fcbArray[fd].size = 0;	 
-	fcbArray[fd].flags = 0;	 
+	// clear the fcbArray members before closing
+	fcbArray[fd].index = 0;
+	fcbArray[fd].bufferUsed = 0;
+	fcbArray[fd].blockPosition = 0;
+	fcbArray[fd].dirPosition = 0;
+	fcbArray[fd].totalBlocks = 0;
+	fcbArray[fd].flags = 0;
 
 	return 0;
 }
