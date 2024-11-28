@@ -190,16 +190,66 @@ int b_write (b_io_fd fd, char * buffer, int count)
 //  +-------------+------------------------------------------------+--------+
 int b_read (b_io_fd fd, char * buffer, int count)
 {
+	int bytesRead = 0; // for reading
+	int bytesCopied = 0; // value returned at the end of read
+	int part1 = 0, part2 = 0, part3 = 0; // holds copy lengths for three cases being handled
+	int blocksToCopy = 0; // holds number of whole blocks that are needed
+	int remainingBytes = 0; // holds bytes within the buffer
 
-	if (startup == 0) b_init();  //Initialize our system
+	if (startup == 0) //Initialize our system
+	{
+		b_init(); 
+	}
 
 	// check that fd is between 0 and (MAXFCBS-1)
 	if ((fd < 0) || (fd >= MAXFCBS))
 	{
 		return (-1); 					//invalid file descriptor
 	}
+
+	// and check that the specified FCB is actually in use	
+	if (fcbArray[fd].fi == NULL)		//File not open for this descriptor
+	{
+		return -1;
+	}
+
+	// flag handling will go here once done with the main portions of the function
+
+	// get the current number of bytes available in the buffer
+	remainingBytes = fcbArray[fd].bufferUsed -fcbArray[fd].index;
+	
+	// limit count to file length to account for eof
+	int amountDelivered = (fcbArray[fd].blockPosition * B_CHUNK_SIZE) - remainingBytes;
+	if((count + amountDelivered) > fcbArray[fd].fi->size)
+	{
+		count = fcbArray[fd].fi->size - amountDelivered;
+		if(count < 0)
+		{
+			printf("ERROR INVALID COUNT");
+		}
+	}
+
+	// part 1, copy from the current buffer
+	if(remainingBytes >= count)
+	{
+		part1 = count;
+		part2 = 0;
+		part3 = 0;
+	}
+	else
+	{
+		part1 = remainingBytes; // first read
+		part3 = count - remainingBytes; // part1 not enough handles excess
+
+		// calculate how many byte chunks needed
+		blocksToCopy = part3 / B_CHUNK_SIZE;
+		part2 = blocksToCopy * B_CHUNK_SIZE;
+
+		// adjust part3 by the number of bytes copied in chunks
+		part3 = part3 - part2;
+	}
 		
-	return (0);	//Change this
+	return bytesCopied; // changed it
 }
 	
 // Interface to Close the file	
