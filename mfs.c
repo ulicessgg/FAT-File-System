@@ -162,7 +162,8 @@ int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // ulices
     }
 }
 
-int fs_isDir(char * pathname)		//return 1 if directory, 0 otherwise // marco
+// return 1 if directory, 0 otherwise , -1 failed to find directory
+int fs_isDir(char * pathname)		
 {
     if(pathname == NULL || (strlen(pathname) == 0))
     {
@@ -170,26 +171,16 @@ int fs_isDir(char * pathname)		//return 1 if directory, 0 otherwise // marco
     }
 
     dir_Entry * entry = NULL;
-    // temp fix for comparison warning thrown by terminal
-    int ind = 1;
-    int * index = &ind;
+    int index;
     char * lastElement = "not here";
-
     int returnVal = parsePath(pathname, &entry, &index, &lastElement);
 
-    //printf("Path Name: %s\nReturn val: %d\nIndex: %d\nLast Elem: %s",pathname,returnVal, index, lastElement);
-
-    dir_Entry* currEnt;
-    LBAread(currEnt, 1, returnVal);
-
-    if(currEnt->is_Directory == 1)
+    if(returnVal == -1)
     {
-        return 1;
+    return -1;
     }
-    else
-    {
-        return 0;
-    }
+
+    return entry[index].is_Directory;
 }
 
 int fs_delete(char* filename)	//removes a file
