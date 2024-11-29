@@ -151,7 +151,7 @@ int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastE
         // adjusting new staring points
         parent = newParent;
         token1 = token2;
-       
+     
     }
     printf("\nend of loop\n");
 }
