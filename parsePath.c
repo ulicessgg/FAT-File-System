@@ -116,6 +116,12 @@ int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastE
             printf("\n enter loop\n");
         token2 = strtok_r(NULL, "/", &savePtr);
         int dirIndex = findInDir(parent, token1);
+
+         // invalid path 
+        if(dirIndex == -1)
+        {
+            return -1;
+        }
        
 
         // gives the parent Dir, index of the element in the parent dir
@@ -131,11 +137,6 @@ int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastE
             return 0;
         }
 
-        // invalid path 
-        if(dirIndex == -1)
-        {
-            return -1;
-        }
         // if it is not a directory then there is alredy a
         // file or invalid path
         else if(isDir(parent[dirIndex]) == 0)
