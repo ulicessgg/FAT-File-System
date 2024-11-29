@@ -7,20 +7,19 @@
 * Group-Name:: The Gunners
 * Project:: Basic File System
 *
-* File:: fs_delete.h
+* File:: fs_rmdir.h
 *
-* Description:: header file for the fs_delete function
+* Description:: header file for the fs_rmdir function
 * 
 * 
 *
 **************************************************************/
 
-#ifndef FS_DELETE_H
-#define FS_DELETE_H
+#ifndef FS_RMDIR_H
+#define FS_RMDIR_H
 
-// Deletes a file at the specified path
-// Returns 0 on success, -1 on failure
+// Removes an empty directory at the specified path.
+// Returns 0 on success, -1 on failure.
+int fs_rmdir(const char *dir_path);
 
-int fs_delete(const char *filepath);
-
-#endif // FS_DELETE_H
+#endif // FS_RMDIR_H
