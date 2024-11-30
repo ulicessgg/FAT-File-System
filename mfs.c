@@ -30,9 +30,9 @@
 static char currentWorkingDir[MAX_PATH_LENGTH] = "/";
 
 // Key directory functions
-int fs_mkdir(const char *pathname, mode_t mode) // marco
+int fs_mkdir(const char *pathname, mode_t mode) // Marco
 {
-    
+    // Need to make sure createDIr works after allocate blocks works
 }
 
 int fs_rmdir(const char *pathname)
@@ -102,8 +102,10 @@ int fs_closedir(fdDir *dirp)
 }
 
 // Misc directory functions
-char* fs_getcwd(char *pathname, size_t size) // marco
+char* fs_getcwd(char *pathname, size_t size) // Marco
 {
+// temp fix
+return "c";
 
 }
 
@@ -163,7 +165,7 @@ int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // ulices
 }
 
 // return 1 if directory, 0 otherwise , -1 failed to find directory
-int fs_isDir(char * pathname)		
+int fs_isDir(char * pathname)	// Marco	
 {
     if(pathname == NULL || (strlen(pathname) == 0))
     {
