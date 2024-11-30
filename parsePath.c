@@ -55,6 +55,25 @@ int findInDir(dir_Entry * parent, char * name)
     return -1;
 }
 
+// TODO:
+// test this function once allocate blocks gives the correct location for the blocks
+// of each dir_Entry
+dir_Entry * loadDir(dir_Entry * entry)
+{
+
+    dir_Entry * newDir = malloc(sizeof(dir_Entry));
+    if(newDir == NULL)
+    {
+        perror("FAILED TO ALLOCATE DIRECTORY");
+        free(newDir);
+        exit(-1);
+    }
+    
+    LBAread(newDir,newDir->size, newDir->blockPos);
+
+    return newDir;
+}
+
 // returns the index of where the dir is in the array
 int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastElement)
 {
@@ -137,11 +156,13 @@ int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastE
             return 0;
         }
 
+        char* dirName = parent[dirIndex].name;
+
         // if it is not a directory then there is alredy a
         // file or invalid path
-        else if(isDir(parent[dirIndex]) == 0)
+        if (fs_isDir(dirName) == 0)
         {
-        return -1;
+            return -1;
         }
         
 

@@ -173,16 +173,18 @@ int fs_isDir(char * pathname)	// Marco
     }
 
     dir_Entry * entry = NULL;
-    int index;
+    int* index = NULL;
     char * lastElement = "not here";
     int returnVal = parsePath(pathname, &entry, &index, &lastElement);
 
     if(returnVal == -1)
     {
-    return -1;
+        return -1;
     }
 
-    return entry[index].is_Directory;
+    int returnIndex = *index;
+
+    return entry[returnIndex].is_Directory;
 }
 
 int fs_delete(char* filename)	//removes a file

@@ -113,25 +113,6 @@ else
 }
 }
 
-// TODO:
-// test this function once allocate blocks gives the correct location for the blocks
-// of each dir_Entry
-dir_Entry * loadDir(dir_Entry * entry)
-{
-
-    dir_Entry * newDir = malloc(sizeof(dir_Entry));
-    if(newDir == NULL)
-    {
-        perror("FAILED TO ALLOCATE DIRECTORY");
-        free(newDir);
-        exit(-1);
-    }
-    
-    LBAread(newDir,newDir->size, newDir->blockPos);
-
-    return newDir;
-}
-
 // Allows user to rename the Directory Entry
 dir_Entry * renameDirEntry(int blockLocation)
 {
