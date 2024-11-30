@@ -104,6 +104,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 
 		//allocate the memory for the vcb
 		root = malloc(blockSize);
+		cwd = malloc(blockSize);
 		if(root == NULL)
 		{
 			perror("FAILED TO ALLOCATE THE ROOT");
@@ -150,4 +151,7 @@ void exitFileSystem()
 	free(root);
     root = NULL;
 	printf("Freed Root\n");
+	free(cwd);
+    cwd = NULL;
+	printf("Freed cwd\n");
 }
