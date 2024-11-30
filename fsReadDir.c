@@ -19,6 +19,8 @@
 #include "fsFAT.h"
 #include "fsVCB.h"
 #include "mfs.h"
+#include "locateDirectory.h"
+
 
 // The function used to read and print directory entries
 int readdir(const char *dirPath) {
