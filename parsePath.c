@@ -29,6 +29,7 @@
 
 
 
+
 // iterates through the directory and tell us the index of the directory if the name is found
 // if the name is not found in the parent dir then return -1
 int findInDir(dir_Entry * parent, char * name)
@@ -78,19 +79,16 @@ dir_Entry * loadDir(dir_Entry * entry)
 int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastElement)
 {
     // checking to see is paramters passed in are valid
-    if(path == NULL)
+    if(path == NULL || strlen(path) == 0)
     {
         return -1;
     }
-    if(strlen(path) == 0)
-    {
-        return -1;
-    }
+    
     // Creates the start directory of where 
     // we will be searching through
     dir_Entry * start;
 
-    // checking for absolute path
+    // checking for absolute vs relaive path
     if(path[0] == '/')
     {
         
@@ -105,6 +103,8 @@ int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastE
         // global variables will keep in main program
         start = cwd;
     }
+
+    if (start == NULL) { printf("Error: start directory is NULL\n"); return -1; }
 
     char* token1;
     char* token2;
@@ -149,10 +149,13 @@ int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastE
         // what the funciton needs to do
         if(token2 == NULL)
         {
-            printf("\nwe lit\n");
+            printf("\nworking\n");
             * returnParent = parent;
             * index = dirIndex;
             * lastElement = token1;
+            printf("\n %s, %d, %s", *returnParent != NULL  ? (*returnParent)[0].name : "NULL parent", index != NULL ? *index : -12121, lastElement != NULL ? *lastElement : "NULL char");
+            printf("\nstill working2\n");
+            // this is the bad part
             return 0;
         }
 

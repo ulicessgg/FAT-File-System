@@ -105,6 +105,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		//allocate the memory for the vcb
 		root = malloc(blockSize);
 		cwd = malloc(blockSize);
+		
 		if(root == NULL)
 		{
 			perror("FAILED TO ALLOCATE THE ROOT");
@@ -115,7 +116,10 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		// step 4 of milestone 1
 		// Create the root directory
 		root = createDirectory(6, NULL); // 0 for now as we are not handling files yet
-	
+		// The current working directory is the root directory 
+		// at initalization
+		memcpy(cwd,root, blockSize);
+
 		// initialize the values in the volume control block
 		vcb->totalBlocks = numberOfBlocks;
 		vcb->blockSize = blockSize;
@@ -131,6 +135,11 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		LBAwrite(FAT, 1, 1);
 		
 		printf("Finished initializing VCB and FAT!\n");
+
+		// still not working
+		
+		//int hi = fs_isDir("/file");
+		//printf("\noutput: %d", hi);
 
 		
 	}

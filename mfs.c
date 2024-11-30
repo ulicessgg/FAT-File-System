@@ -172,16 +172,21 @@ int fs_isDir(char * pathname)	// Marco
         return -1;
     }
 
+    
     dir_Entry * entry = NULL;
     int* index = NULL;
     char * lastElement = "not here";
-    int returnVal = parsePath(pathname, &entry, &index, &lastElement);
-
+    printf("\n\n----here");
+    int returnVal =121212;
+     returnVal = parsePath(pathname, &entry, &index, &lastElement);
+    printf("----here2");
     if(returnVal == -1)
     {
+         printf("hi");
         return -1;
     }
 
+     printf("----here3");
     int returnIndex = *index;
 
     return entry[returnIndex].is_Directory;
@@ -190,6 +195,42 @@ int fs_isDir(char * pathname)	// Marco
 int fs_delete(char* filename)	//removes a file
 {
 
+int fs_delete(const char *file_path) {
+    if (!file_path) {
+        fprintf(stderr, "Error: File path is NULL.\n");
+        return -1;
+    }
+
+    dir_Entry *parentDir = NULL;
+    int *dirIndex = NULL;
+    char *lastElement = NULL;
+
+    // Step 1: parse file path to locate file and parent directory
+    if (parsePath(file_path, &parentDir, &dirIndex, &lastElement) != 0) {
+        fprintf(stderr, "Error: Failed to parse file path.\n");
+        return -1;
+    }
+
+    // Step 2: verify that path points to a file
+    if (!fs_isFile(file_path)) {
+        fprintf(stderr, "Error: %s is not a file.\n", file_path);
+        return -1;
+    }
+
+    // Step 3: remove file's entry from parent directory
+    if (remove_directory_entry(parentDir, *dirIndex) != 0) {
+        fprintf(stderr, "Error: Failed to remove directory entry for %s.\n", file_path);
+        return -1;
+    }
+
+    // Step 4: free disk space allocated to the file
+    if (free_disk_blocks(file_path) != 0) {
+        fprintf(stderr, "Error: Failed to free disk blocks for %s.\n", file_path);
+        return -1;
+    }
+
+    return 0;
+}
 }
 
 int fs_stat(const char *path, struct fs_stat *buf) // prash
