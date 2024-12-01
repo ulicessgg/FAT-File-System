@@ -179,3 +179,82 @@ int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastE
     }
     printf("\nend of loop\n");
 }
+
+// Helper to split a path into components // prash
+static char** splitPath(const char *path, int *numComponents) {
+    if (path == NULL || strlen(path) == 0) {
+        *numComponents = 0;
+        return NULL;
+    }
+
+    char *pathCopy = strdup(path); // Duplicate path to modify it
+    if (pathCopy == NULL) {
+        return NULL;
+    }
+
+    int capacity = 10; // Initial capacity for components array
+    char **components = (char **)malloc(capacity * sizeof(char *));
+    if (components == NULL) {
+        free(pathCopy);
+        return NULL;
+    }
+
+    int count = 0;
+    char *token = strtok(pathCopy, "/");
+    while (token != NULL) {
+        if (count >= capacity) {
+            capacity *= 2;
+            components = (char **)realloc(components, capacity * sizeof(char *));
+            if (components == NULL) {
+                free(pathCopy);
+                return NULL;
+            }
+        }
+        components[count++] = strdup(token);
+        token = strtok(NULL, "/");
+    }
+
+    *numComponents = count;
+    free(pathCopy);
+    return components;
+}
+
+// Locate a directory given its path // prash
+dir_Entry* locateDirectory(const char *dirPath) {
+    if (dirPath == NULL || strlen(dirPath) == 0) {
+        fprintf(stderr, "Error: Invalid directory path\n");
+        return NULL;
+    }
+
+    int numComponents = 0;
+    char **components = splitPath(dirPath, &numComponents);
+    if (components == NULL || numComponents == 0) {
+        fprintf(stderr, "Error: Failed to parse directory path\n");
+        return NULL;
+    }
+
+    // Start at the root directory
+    dir_Entry *currentDir = getRootDirectory(); // Assuming this function retrieves the root directory
+    if (currentDir == NULL) {
+        fprintf(stderr, "Error: Root directory not found\n");
+        return NULL;
+    }
+
+    for (int i = 0; i < numComponents; i++) {
+        dir_Entry *nextDir = findDirectoryEntry(currentDir, components[i]); // Locate subdirectory
+        if (nextDir == NULL || nextDir->is_Directory == 0) {
+            fprintf(stderr, "Error: Component '%s' not found or is not a directory\n", components[i]);
+            currentDir = NULL;
+            break;
+        }
+        currentDir = nextDir; // Move to the next directory
+    }
+
+    // Clean up components
+    for (int i = 0; i < numComponents; i++) {
+        free(components[i]);
+    }
+    free(components);
+
+    return currentDir;
+}
