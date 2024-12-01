@@ -30,6 +30,7 @@
 #define FAT_RESERVED 0xBE1355
 #define FAT_FREE 0
 #define FAT_EOF -1
+#define BLOCKSIZE 512
 
 int initFAT(uint64_t numBlocks, uint64_t blockSize) {
     int requiredBytes = numBlocks * sizeof(int);
@@ -56,6 +57,7 @@ int initFAT(uint64_t numBlocks, uint64_t blockSize) {
     // Update VCB
     vcb->freeBlockCount = numBlocks - blocksOccupied - 1;
     vcb->fatSize = blocksOccupied;
+    printf("FAT SIZEDEBUGGG: %d\n\n", blocksOccupied);
     vcb->fatLoc = 1;
     vcb->freeBlockStart = blocksOccupied;
 
@@ -138,8 +140,56 @@ void debugFreeSpaceChain() { // used for debugging
 }
 
 
+
 // Function to allocate multiple blocks for a file, returns starting block index
-int allocateBlocks(uint64_t blockCount, uint64_t blockSize) {
+// blockCount = number of blocks you want to take
+// minContigious = the min ammount of blocks you want to be contigious
+int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
+
+    // allocating a buffer to hold the total size of the fat
+
+    int * bufferOfFat = malloc(vcb->fatSize*BLOCKSIZE);
+
+    int congtigiousIndex = 0;
+
+    //check to see if right calculation for # of int;s in the buff
+    printf("\n# of Int's in buff: %d\n", (vcb->fatSize*BLOCKSIZE)/4);
+
+    // Finding first freeblock
+    for(int i =0; i <= bufferOfFat[(vcb->fatSize*BLOCKSIZE)/4]; i++)
+    {
+        // If the block is free we need to check if there is
+        // congigious space for the rest of the disk
+        if(bufferOfFat[congtigiousIndex] == 0)
+        {
+            // Now we know the index we are at refers to 
+            // a free block, now have to check for a 
+            // contigious list of free blocks
+            int x tempIndex = congtigiousIndex;
+            int temp = congtigiousIndex;
+            for(int x=0; x<= minContigious; x++)
+            {
+                if(bufferOfFat[tempIndex] != 0 ||  x == minContigious)
+                {
+                    break;
+                }
+                tempIndex++;
+                temp++;
+            }
+            // Case that there is a list of contigious blocks
+            // means that we can use the index found from the
+            // first for loop
+            if(temp == minContigious)
+            {
+                break;
+            }
+
+        }
+        congtigiousIndex++;
+    }
+    
+    
+
 	int startBlock = -1, prevBlock = -1;
 	for (uint64_t i = 2; i < blockCount; i++) {
 		int currentBlock = allocateBlock();
