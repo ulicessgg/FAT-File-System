@@ -113,18 +113,10 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 			exit(-1);
 		}
 
-		// step 4 of milestone 1
-		// Create the root directory
-		root = createDirectory(6, NULL); // 0 for now as we are not handling files yet
-		// The current working directory is the root directory 
-		// at initalization
-		memcpy(cwd,root, blockSize);
-
 		// initialize the values in the volume control block
 		vcb->totalBlocks = numberOfBlocks;
 		vcb->blockSize = blockSize;
 		vcb->freeBlockCount = numberOfBlocks - 1; 
-		vcb->fatSize = numberOfBlocks - 1; 
 		vcb->rootLoc = root->blockPos; 
 		vcb->signature = signature;
 		strcpy(vcb->sysType,"The Gunners");
@@ -136,8 +128,17 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		
 		printf("Finished initializing VCB and FAT!\n");
 
+		// step 4 of milestone 1
+		// Create the root directory
+		root = createDirectory(11, NULL); // 0 for now as we are not handling files yet
+		// The current working directory is the root directory 
+		// at initalization
+		memcpy(cwd,root, blockSize);
+
+		printf("Finished initializing Root Directory!\n");
+
 		// still not working
-		
+
 		//int hi = fs_isDir("/file");
 		//printf("\noutput: %d", hi);
 
