@@ -147,7 +147,6 @@ void debugFreeSpaceChain() { // used for debugging
 int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
 
     // allocating a buffer to hold the total size of the fat
-
     int * bufferOfFat = malloc(vcb->fatSize*BLOCKSIZE);
 
     int congtigiousIndex = 0;
@@ -165,11 +164,11 @@ int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
             // Now we know the index we are at refers to 
             // a free block, now have to check for a 
             // contigious list of free blocks
-            int x tempIndex = congtigiousIndex;
-            int temp = congtigiousIndex;
-            for(int x=0; x<= minContigious; x++)
+            int tempIndex = congtigiousIndex;
+            int temp = 0;
+            for(int x=0; x<= minContigiuos; x++)
             {
-                if(bufferOfFat[tempIndex] != 0 ||  x == minContigious)
+                if(bufferOfFat[tempIndex] != 0 ||  x == minContigiuos)
                 {
                     break;
                 }
@@ -179,7 +178,7 @@ int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
             // Case that there is a list of contigious blocks
             // means that we can use the index found from the
             // first for loop
-            if(temp == minContigious)
+            if(temp == minContigiuos)
             {
                 break;
             }
@@ -190,24 +189,8 @@ int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
     
     
 
-	int startBlock = -1, prevBlock = -1;
-	for (uint64_t i = 2; i < blockCount; i++) {
-		int currentBlock = allocateBlock();
-		if (currentBlock == -1) {
-			fprintf(stderr, "Error: Not enough free blocks available\n");
-			exit(-1); // not enough blocks are availble
-		}
-
-		if (i==0) {
-			startBlock = currentBlock; // Start of file
-		} else {
-			FAT[prevBlock] = currentBlock; // Link the previous block to the current
-		}
-		prevBlock = currentBlock; // Update previous block
-	}
-
-	FAT[prevBlock] = -1; // Mark EOF chain
-	return startBlock; // Return the starting block
+	
+	return 5;
 }
 
 // Function to find and allocate a single free block
