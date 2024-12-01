@@ -20,5 +20,7 @@ extern dir_Entry *root;
 // Function prototypes
 int parsePath(char *path, dir_Entry **returnParent, int **index, char **lastElement);
 int findInDir(dir_Entry *parent, char *name);
+static char** splitPath(const char *path, int *numComponents);
+dir_Entry* locateDirectory(const char *dirPath);
 
 #endif 

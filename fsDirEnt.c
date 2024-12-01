@@ -120,18 +120,6 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
     return new;
 }
 
-// 1 if it is a directory and 0 if not
-int isDir(dir_Entry * entry){
-if(entry->is_Directory == 1)
-{
-    return 1;
-}
-else
-{
-    return 0;
-}
-}
-
 // Allows user to rename the Directory Entry
 dir_Entry * renameDirEntry(int blockLocation)
 {

@@ -234,14 +234,16 @@ dir_Entry* locateDirectory(const char *dirPath) {
     }
 
     // Start at the root directory
-    dir_Entry *currentDir = getRootDirectory(); // Assuming this function retrieves the root directory
+    // Assuming this function retrieves the root directory - Not sure what this implies? Ulices
+    dir_Entry *currentDir; // cannot find the following function or it never was implemented getRootDirectory();
     if (currentDir == NULL) {
         fprintf(stderr, "Error: Root directory not found\n");
         return NULL;
     }
 
     for (int i = 0; i < numComponents; i++) {
-        dir_Entry *nextDir = findDirectoryEntry(currentDir, components[i]); // Locate subdirectory
+        // Locate subdirectory
+        dir_Entry *nextDir; // same issue here doesnt exist or cannot be found findDirectoryEntry(currentDir, components[i]);
         if (nextDir == NULL || nextDir->is_Directory == 0) {
             fprintf(stderr, "Error: Component '%s' not found or is not a directory\n", components[i]);
             currentDir = NULL;

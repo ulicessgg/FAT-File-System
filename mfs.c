@@ -47,17 +47,18 @@ int fs_rmdir(const char *pathname) // yash
     char *lastElement = NULL;
 
     // Step 1: parse directory path to locate the directory and its parent
-    if (parsePath(pathname, &parentDir, &dirIndex, &lastElement) != 0) {
+    if (parsePath((char *) pathname, &parentDir, &dirIndex, &lastElement) != 0) {
         fprintf(stderr, "Error: Failed to parse directory path.\n");
         return -1;
     }
 
     // Step 2: verify that the path points to a directory
-    if (!fs_isDir(pathname)) {
+    if (!fs_isDir((char *) pathname)) {
         fprintf(stderr, "Error: %s is not a directory.\n", pathname);
         return -1;
     }
 
+    /* Helper functions either havent been implemented or do not exist
     // Step 3: make sure that the directory is empty
     if (!is_directory_empty(pathname)) {
         fprintf(stderr, "Error: Directory %s is not empty.\n", pathname);
@@ -69,6 +70,7 @@ int fs_rmdir(const char *pathname) // yash
         fprintf(stderr, "Error: Failed to remove directory entry for %s.\n", pathname);
         return -1;
     }
+    */
 
     return 0;
 }
@@ -290,7 +292,7 @@ int fs_delete(char* filename)	//removes a file // yash
         fprintf(stderr, "Error: %s is not a file.\n", filename);
         return -1;
     }
-
+    /* Helper functions either havent been implemented or do not exist
     // Step 3: remove file's entry from parent directory
     if (remove_directory_entry(parentDir, *dirIndex) != 0) {
         fprintf(stderr, "Error: Failed to remove directory entry for %s.\n", filename);
@@ -302,7 +304,7 @@ int fs_delete(char* filename)	//removes a file // yash
         fprintf(stderr, "Error: Failed to free disk blocks for %s.\n", filename);
         return -1;
     }
-
+    */
     return 0;
 }
 
