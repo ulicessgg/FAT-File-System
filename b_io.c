@@ -162,7 +162,7 @@ int b_seek (b_io_fd fd, off_t offset, int whence)
 int b_write (b_io_fd fd, char * buffer, int count)
 {
 	int bytesCopied = 0; // used for write
-	const char* tempBuf = malloc(B_CHUNK_SIZE); // used to copy to file buffer
+	char* tempBuf = malloc(B_CHUNK_SIZE); // used to copy to file buffer
 	fcbArray[fd].buffer; // used to write
 
 	if (startup == 0) //Initializes our system
