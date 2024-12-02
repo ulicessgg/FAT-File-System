@@ -34,7 +34,7 @@
 #define BLOCKSIZE 512
 
 extern int *FAT; // Pointer to the FAT array
-extern int LBAwrite(void *buffer, uint64_t count, uint64_t start);
+extern uint64_t LBAwrite(void *buffer, uint64_t lbaCount, uint64_t lbaPosition);
 
 // Function to initialize the FAT structure
 int initFAT(uint64_t numBlocks, uint64_t blockSize) {
