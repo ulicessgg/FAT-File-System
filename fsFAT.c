@@ -153,6 +153,7 @@ int allocateBlock(int * bufferOfFat, int currentIndex, int bufferSize) {
 // Function to allocate multiple blocks for a file, returns starting block index
 // blockCount = number of blocks you want to take
 // minContigious = the min ammount of blocks you want to be contigious
+// returns -1 when there is no more space left
 int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
 
     // Calculateing and allocating a buffer to hold the 
@@ -197,6 +198,7 @@ int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
         }
         congtigiousIndex++;
     }
+    int FirstIndex = congtigiousIndex;
 
 
      // Finding first freeblock
@@ -243,9 +245,12 @@ int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
         // leaving out the last block
         if (blockCount > 1)
         {
+            // 
             nextBlockChain = allocateBlock(bufferOfFat, index+1, bufferSize);
             if (nextBlockChain == -1) {
+
                 printf("\nNo more available blocks\n");
+                return -1;
                 break;
             }
         }
@@ -262,8 +267,9 @@ int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
             break;
         }
     }
-	
-	return 5;
+
+    writeBlocks(0,bufferSize, bufferOfFat);
+	return FirstIndex;
 }
 
 
