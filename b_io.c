@@ -127,8 +127,8 @@ b_io_fd b_open (char * filename, int flags)
 	// clear the fcbArray members before read
 	fcbArray[fd].index = 0;
 	fcbArray[fd].bufferUsed = 0;
-	fcbArray[fd].blockPosition = 0;
-	fcbArray[fd].dirPosition = fcbArray[fd].fi->blockPos;
+	fcbArray[fd].blockPosition = fcbArray[fd].fi->blockPos;
+	fcbArray[fd].dirPosition = *index;
 	fcbArray[fd].totalBlocks = (fcbArray[fd].fi->size + (B_CHUNK_SIZE - 1)) 
 							   / B_CHUNK_SIZE;
 	// set the flags for the current file
@@ -178,6 +178,12 @@ int b_write (b_io_fd fd, char * buffer, int count)
 
 	// and check that the specified FCB is actually in use	
 	if (fcbArray[fd].fi == NULL)		//File not open for this descriptor
+	{
+		return -1;
+	}
+
+	// flag handling, only proceeds if file has write permissions
+	if(fcbArray[fd].flags != O_WRONLY || fcbArray[fd].flags != O_RDWR)
 	{
 		return -1;
 	}
@@ -281,7 +287,11 @@ int b_read (b_io_fd fd, char * buffer, int count)
 		return -1;
 	}
 
-	// flag handling will go here once done with the main portions of the function
+	// flag handling, only proceeds if file has read permissions
+	if(fcbArray[fd].flags != O_RDONLY || fcbArray[fd].flags != O_RDWR)
+	{
+		return -1;
+	}
 
 	// get the current number of bytes available in the buffer
 	remainingBytes = fcbArray[fd].bufferUsed -fcbArray[fd].index;
@@ -324,13 +334,15 @@ int b_read (b_io_fd fd, char * buffer, int count)
 	}
 	if(part2 > 0) // copy directly to user buffer
 	{
-		bytesRead = LBAread(buffer + part1, blocksToCopy, fcbArray[fd].blockPosition + fcbArray[fd].fi->blockPos);
+		bytesRead = LBAread(buffer + part1, blocksToCopy, 
+							fcbArray[fd].blockPosition + fcbArray[fd].fi->blockPos);
 		fcbArray[fd].blockPosition += blocksToCopy;
 		part2 = bytesRead * B_CHUNK_SIZE;
 	}
 	if(part3 > 0) // refill buffer to copy more
 	{
-		bytesRead = LBAread(fcbArray[fd].buffer, 1, fcbArray[fd].blockPosition + fcbArray[fd].fi->blockPos);
+		bytesRead = LBAread(fcbArray[fd].buffer, 1, 
+							fcbArray[fd].blockPosition + fcbArray[fd].fi->blockPos);
 		bytesRead = bytesRead * B_CHUNK_SIZE;
 
 		fcbArray[fd].blockPosition += 1;
