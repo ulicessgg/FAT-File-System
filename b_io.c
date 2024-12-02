@@ -199,7 +199,7 @@ int b_write (b_io_fd fd, char * buffer, int count)
 				   (B_CHUNK_SIZE - fcbArray[fd].index));
 
 			// strung together version of commitBlock to write to disk
-			int freeBlock = allocateBlock();
+			int freeBlock = allocateBlocks(1, 1);
 			LBAwrite(fcbArray[fd].buffer, 1, freeBlock);
 
             // temp is moved ahead after the copied contents for next write
@@ -225,7 +225,7 @@ int b_write (b_io_fd fd, char * buffer, int count)
     if(fcbArray[fd].index > 0)
     {
         // strung together version of commitBlock to write to disk
-		int freeBlock = allocateBlock();
+		int freeBlock = allocateBlocks(1, 1);
 		LBAwrite(fcbArray[fd].buffer, 1, freeBlock);
     }
 
