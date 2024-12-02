@@ -25,6 +25,7 @@
 #include "fsLow.h"
 #include "fsVCB.h"
 #include "mfs.h"
+#include "parsePath.h"
 
 #define MAXFCBS 20
 #define B_CHUNK_SIZE 512
@@ -83,8 +84,6 @@ b_io_fd b_getFCB ()
 // O_RDONLY, O_WRONLY, or O_RDWR
 b_io_fd b_open (char * filename, int flags)
 {
-	b_io_fd fd;
-
 	// if found return the index if not create the file and return the index
 
 	// call parsepath somewhere here in order to get the directory entry for the file
@@ -106,8 +105,11 @@ b_io_fd b_open (char * filename, int flags)
 		return -2;
 	}
 
+	int* index = NULL;
+	char* lastElement = NULL;
+
 	// save the file info returned from GetFileInfo
-	fcbArray[fd].fi = GetFileInfo(filename); // function does not exist so i will use parse path
+	parsePath(filename, &fcbArray[fd].fi, &index, &lastElement);
 	// if GetFileInfo returns null return a negative
 	if(fcbArray[fd].fi == NULL)
 	{
@@ -136,6 +138,9 @@ b_io_fd b_open (char * filename, int flags)
 }
 
 // if time allows this will be done after write due to lower priority
+// due to issues with other functions, partly due to them being neglected
+// or half hazardly done seek will be skipped in order to have time to debug
+// and comment out dangerous code from mfs 
 
 // Interface to seek function	
 int b_seek (b_io_fd fd, off_t offset, int whence)
@@ -156,15 +161,76 @@ int b_seek (b_io_fd fd, off_t offset, int whence)
 // Interface to write function	
 int b_write (b_io_fd fd, char * buffer, int count)
 {
-	if (startup == 0) b_init();  //Initialize our system
+	int bytesCopied = 0; // used for write
+	char* tempBuf = malloc(B_CHUNK_SIZE); // used to copy to file buffer
+	fcbArray[fd].buffer; // used to write
+
+	if (startup == 0) //Initializes our system
+	{
+		b_init(); 
+	}
 
 	// check that fd is between 0 and (MAXFCBS-1)
 	if ((fd < 0) || (fd >= MAXFCBS))
 	{
 		return (-1); 					//invalid file descriptor
 	}
+
+	// and check that the specified FCB is actually in use	
+	if (fcbArray[fd].fi == NULL)		//File not open for this descriptor
+	{
+		return -1;
+	}
+
+    // initializes the value of tempbuf with 1 block of data for write
+    strncpy(tempBuf, buffer, B_CHUNK_SIZE);
+
+    // copies and writes buffer to memory
+    while(tempBuf != NULL)
+    {
+        // spaceNeeded is set to the total bytes of temp
+        int spaceNeeded = strlen(tempBuf);
+
+        // if buffer is near capacity  
+        if(fcbArray[fd].index + spaceNeeded >= B_CHUNK_SIZE)
+        {
+            // as much of temp is copied and the buffer is commited
+            memcpy(fcbArray[fd].buffer + fcbArray[fd].index, tempBuf, 
+				   (B_CHUNK_SIZE - fcbArray[fd].index));
+
+            // commitBlock(fcbArray[fd].buffer); //  need to either use lba write but with specific parameters
+			// while also using allocate Blocks and find a free block to write to
+
+            // temp is moved ahead after the copied contents for next write
+            tempBuf += (B_CHUNK_SIZE - fcbArray[fd].index);
+
+			// bytesCopied is used to return the total memory written
+			bytesCopied += spaceNeeded; 
+
+            // spaceNeeded and index are updated for next write
+            spaceNeeded -= (B_CHUNK_SIZE - fcbArray[fd].index);
+            fcbArray[fd].index = 0;
+        }
+
+        // contents of temp are copied and index is updated
+        memcpy(fcbArray[fd].buffer + fcbArray[fd].index, tempBuf, spaceNeeded);
+        fcbArray[fd].index += spaceNeeded;
+
+        // temp is set to the next string block
+        strncpy(tempBuf, buffer + bytesCopied, B_CHUNK_SIZE);
+    }
+
+    // if any strings are leftover the buffer will be commited
+    if(fcbArray[fd].index > 0)
+    {
+        // commitBlock(fcbArray[fd].buffer); //  need to either use lba write but with specific parameters
+		// while also using allocate Blocks and find a free block to write to
+    }
+
+    // tempBuf is deallocated
+    free(tempBuf);
 		
-	return (0); //Change this
+	return bytesCopied;
 }
 
 

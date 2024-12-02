@@ -23,7 +23,7 @@
 #include <readline/history.h>
 #include <getopt.h>
 #include <string.h>
-
+#include <b_io.h>
 #include "fsLow.h"
 #include "mfs.h"
 
@@ -36,16 +36,16 @@
 
 /****   SET THESE TO 1 WHEN READY TO TEST THAT COMMAND ****/
 #define CMDLS_ON	1 // changed
-#define CMDCP_ON	0
-#define CMDMV_ON	0
+#define CMDCP_ON	1 // changed
+#define CMDMV_ON	0 // not implemented
 #define CMDMD_ON	1 // changed
 #define CMDRM_ON	1 // changed
-#define CMDCP2L_ON	0
-#define CMDCP2FS_ON	0
+#define CMDCP2L_ON	0 // changed
+#define CMDCP2FS_ON	1 // changed
 #define CMDCD_ON	1 // changed
 #define CMDPWD_ON	1 // changed
-#define CMDTOUCH_ON	0
-#define CMDCAT_ON	0
+#define CMDTOUCH_ON	1 // changed
+#define CMDCAT_ON	1 // changed
 
 
 typedef struct dispatch_t

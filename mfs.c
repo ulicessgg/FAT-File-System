@@ -35,13 +35,48 @@ int fs_mkdir(const char *pathname, mode_t mode) // Marco
     // Need to make sure createDIr works after allocate blocks works
 }
 
-int fs_rmdir(const char *pathname)
+int fs_rmdir(const char *pathname) // yash
 {
+    if (!pathname) {
+        fprintf(stderr, "Error: Directory path is NULL.\n");
+        return -1;
+    }
 
+    dir_Entry *parentDir = NULL;
+    int *dirIndex = NULL;
+    char *lastElement = NULL;
+
+    // Step 1: parse directory path to locate the directory and its parent
+    if (parsePath((char *) pathname, &parentDir, &dirIndex, &lastElement) != 0) {
+        fprintf(stderr, "Error: Failed to parse directory path.\n");
+        return -1;
+    }
+
+    // Step 2: verify that the path points to a directory
+    if (!fs_isDir((char *) pathname)) {
+        fprintf(stderr, "Error: %s is not a directory.\n", pathname);
+        return -1;
+    }
+
+    /* Helper functions either havent been implemented or do not exist
+    // Step 3: make sure that the directory is empty
+    if (!is_directory_empty(pathname)) {
+        fprintf(stderr, "Error: Directory %s is not empty.\n", pathname);
+        return -1;
+    }
+
+    // Step 4: remove directory entry from parent directory
+    if (remove_directory_entry(parentDir, *dirIndex) != 0) {
+        fprintf(stderr, "Error: Failed to remove directory entry for %s.\n", pathname);
+        return -1;
+    }
+    */
+
+    return 0;
 }
 
 // Directory iteration functions
-fdDir* fs_opendir(const char *pathname)
+fdDir* fs_opendir(const char *pathname) // prash
 {
     if ((char *)pathname == NULL || strlen((char *)pathname) == 0)
     {
@@ -84,10 +119,58 @@ fdDir* fs_opendir(const char *pathname)
 
 struct fs_diriteminfo *fs_readdir(fdDir *dirp) // prash or yash
 {
+    /*  returns the wrong type and not using the prototype above ^
 
+    // int readdir(const char *dirPath) do not use this edit pls
+
+    if (dirPath == NULL) {
+        fprintf(stderr, "Error: Directory path is NULL\n");
+        return -1;
+    }
+
+    // Load the directory entry
+    dir_Entry *currentDir = locateDirectory(dirPath);
+    if (currentDir == NULL) {
+        fprintf(stderr, "Error: Directory not found\n");
+        return -1;
+    }
+
+    if (currentDir->is_Directory != 1) {
+        fprintf(stderr, "Error: Path is not a directory\n");
+        return -1;
+    }
+
+    // Load the entries in the directory
+    unsigned int numEntries = currentDir->size / sizeof(dir_Entry);
+    dir_Entry *entries = (dir_Entry *)malloc(currentDir->size);
+    if (entries == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed\n");
+        return -1;
+    }
+
+    if (readDirectoryEntries(currentDir->blockPos, entries, numEntries) < 0) {
+        fprintf(stderr, "Error: Failed to read directory entries\n");
+        free(entries);
+        return -1;
+    }
+
+    // Print directory entries
+    printf("Contents of directory '%s': \n", dirPath);
+    for (unsigned int i = 0; i < numEntries; i++) {
+        if (strlen(entries[i].name) > 0) { // Check if entry is valid
+            printf("%s\t%s\t%u bytes\n",
+            entries[i].is_Directory ? "[DIR]" : "[FILE]",
+            entries[i].name,
+            entries[i].size);
+        }
+    }
+
+    free(entries);
+    return 0;
+    */
 }
 
-int fs_closedir(fdDir *dirp)
+int fs_closedir(fdDir *dirp) // prash
 {
     if (dirp == NULL)
     {
@@ -134,7 +217,7 @@ int fs_setcwd(char *pathname)   //linux chdir // prash
     return 0; // Success
 }
 
-int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // ulices
+int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // marco
 {
     if(filename == NULL || (strlen(filename) == 0))
     {
@@ -142,26 +225,22 @@ int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // ulices
     }
 
     dir_Entry * entry = NULL;
-    // temp fix for comparison warning thrown by terminal
-    int ind = 1;
-    int * index = &ind;
+    int* index = NULL;
     char * lastElement = "not here";
-
-    int returnVal = parsePath(filename, &entry, &index, &lastElement);
-
-    //printf("Path Name: %s\nReturn val: %d\nIndex: %d\nLast Elem: %s",pathname,returnVal, index, lastElement);
-
-    dir_Entry* currEnt;
-    LBAread(currEnt, 1, returnVal);
-
-    if(currEnt->is_Directory == 0)
+    printf("\n\n----here");
+    int returnVal =121212;
+     returnVal = parsePath(filename, &entry, &index, &lastElement);
+    printf("----here2");
+    if(returnVal == -1)
     {
-        return 1;
+         printf("hi");
+        return -1;
     }
-    else
-    {
-        return 0;
-    }
+
+     printf("----here3");
+    int returnIndex = *index;
+
+    return entry[returnIndex].is_Directory;
 }
 
 // return 1 if directory, 0 otherwise , -1 failed to find directory
@@ -172,7 +251,6 @@ int fs_isDir(char * pathname)	// Marco
         return -1;
     }
 
-    
     dir_Entry * entry = NULL;
     int* index = NULL;
     char * lastElement = "not here";
@@ -192,11 +270,9 @@ int fs_isDir(char * pathname)	// Marco
     return entry[returnIndex].is_Directory;
 }
 
-int fs_delete(char* filename)	//removes a file
+int fs_delete(char* filename)	//removes a file // yash
 {
-
-int fs_delete(const char *file_path) {
-    if (!file_path) {
+    if (!filename) {
         fprintf(stderr, "Error: File path is NULL.\n");
         return -1;
     }
@@ -206,36 +282,51 @@ int fs_delete(const char *file_path) {
     char *lastElement = NULL;
 
     // Step 1: parse file path to locate file and parent directory
-    if (parsePath(file_path, &parentDir, &dirIndex, &lastElement) != 0) {
+    if (parsePath(filename, &parentDir, &dirIndex, &lastElement) != 0) {
         fprintf(stderr, "Error: Failed to parse file path.\n");
         return -1;
     }
 
     // Step 2: verify that path points to a file
-    if (!fs_isFile(file_path)) {
-        fprintf(stderr, "Error: %s is not a file.\n", file_path);
+    if (!fs_isFile(filename)) {
+        fprintf(stderr, "Error: %s is not a file.\n", filename);
         return -1;
     }
-
+    /* Helper functions either havent been implemented or do not exist
     // Step 3: remove file's entry from parent directory
     if (remove_directory_entry(parentDir, *dirIndex) != 0) {
-        fprintf(stderr, "Error: Failed to remove directory entry for %s.\n", file_path);
+        fprintf(stderr, "Error: Failed to remove directory entry for %s.\n", filename);
         return -1;
     }
 
     // Step 4: free disk space allocated to the file
-    if (free_disk_blocks(file_path) != 0) {
-        fprintf(stderr, "Error: Failed to free disk blocks for %s.\n", file_path);
+    if (free_disk_blocks(filename) != 0) {
+        fprintf(stderr, "Error: Failed to free disk blocks for %s.\n", filename);
         return -1;
     }
-
+    */
     return 0;
-}
 }
 
 int fs_stat(const char *path, struct fs_stat *buf) // prash
 {
+    if (path == NULL || buf == NULL) {
+        fprintf(stderr, "Error: Invalid arguments to fs_stat\n");
+        return -1;
+    }
 
+    // Locate the file or directory
+    dir_Entry *entry = locateDirectory(path); // Use locateDirectory to resolve the path
+    if (entry == NULL) {
+        fprintf(stderr, "Error: Path not found\n");
+        return -1;
+    }
+
+    // Populate the fs_stat structure
+    // buf->type = entry->is_Directory ? 1 : 0; // not using fs_stat struct 
+    // buf->size = entry->size; // not using fs_stat struct either
+
+    return 0; // Success
 }
 
 
