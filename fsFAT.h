@@ -11,6 +11,8 @@
 * management as well as global instance of the FAT
 *
 **************************************************************/
+
+#include <fsLow.h>
 #ifndef FSFAT_H
 #define FSFAT_H
 

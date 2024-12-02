@@ -25,6 +25,7 @@
 #include "fsLow.h"
 #include "fsVCB.h"
 #include "mfs.h"
+#include "parsePath.h"
 
 #define MAXFCBS 20
 #define B_CHUNK_SIZE 512
@@ -83,8 +84,6 @@ b_io_fd b_getFCB ()
 // O_RDONLY, O_WRONLY, or O_RDWR
 b_io_fd b_open (char * filename, int flags)
 {
-	b_io_fd fd;
-
 	// if found return the index if not create the file and return the index
 
 	// call parsepath somewhere here in order to get the directory entry for the file
@@ -106,8 +105,11 @@ b_io_fd b_open (char * filename, int flags)
 		return -2;
 	}
 
+	int* index = NULL;
+	char* lastElement = NULL;
+
 	// save the file info returned from GetFileInfo
-	fcbArray[fd].fi = GetFileInfo(filename); // function does not exist so i will use parse path
+	parsePath(filename, &fcbArray[fd].fi, &index, &lastElement);
 	// if GetFileInfo returns null return a negative
 	if(fcbArray[fd].fi == NULL)
 	{
