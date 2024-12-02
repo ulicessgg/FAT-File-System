@@ -31,7 +31,44 @@ static char currentWorkingDir[MAX_PATH_LENGTH] = "/";
 // Key directory functions
 int fs_mkdir(const char *pathname, mode_t mode) // Marco
 {
-    // Need to make sure createDIr works after allocate blocks works
+    // Checking paramters passed in are valid
+    if(pathname == NULL )
+    {
+        return -1;
+    }
+
+    // Looking for the parent directory and l
+    // location for destination of new 
+    // directory entry
+    dir_Entry * parent = NULL;
+    int* index = NULL;
+    char * lastElement = "not here";
+    int returnVal =121212;
+    returnVal = parsePath((char *)pathname, &parent, &index, &lastElement);
+    printf("----here2");
+
+    // Cecking if a directory with the same name exists
+    if(returnVal == 0 && parent->is_Directory == 1)
+    {
+        printf("\nDirectory already created with this name.\n");
+        return -1;
+    }
+
+    // creating new directory
+    dir_Entry * newDir = createDirectory(2,parent);
+    if(newDir == NULL)
+    {
+        printf("\nError creating new Dir.\n");
+        return -1;
+    }
+
+    // Adding new data of the created dir to the parent
+    strcpy( (char*) pathname, parent[*index].name);
+    parent[*index].is_Directory = 1;
+    parent[*index].last_edited = newDir->creation_date;
+
+    return 0;
+
 }
 
 int fs_rmdir(const char *pathname) // yash
@@ -232,14 +269,20 @@ int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // marco
     printf("----here2");
     if(returnVal == -1)
     {
-         printf("hi");
+        printf("hi");
         return -1;
     }
 
      printf("----here3");
     int returnIndex = *index;
-
-    return entry[returnIndex].is_Directory;
+    if(entry[returnIndex].is_Directory == 1)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
 }
 
 // return 1 if directory, 0 otherwise , -1 failed to find directory
