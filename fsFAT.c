@@ -31,6 +31,8 @@
 #define FAT_EOF -2  // End of a chain (EOF)
 #define FAT_RESERVED -3      // Reserved for metadata
 
+#define BLOCKSIZE 512
+
 extern int *FAT; // Pointer to the FAT array
 extern int LBAwrite(void *buffer, uint64_t count, uint64_t start);
 
