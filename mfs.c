@@ -9,9 +9,8 @@
 * File:: mfs.h
 *
 * Description:: 
-*	This is the file system interface.
-*	This is the interface needed by the driver to interact with
-*	your filesystem.
+*	Implementation of file system interface needed by the driver
+*   to interact with our filesystem.
 *
 **************************************************************/
 #include <stdlib.h>

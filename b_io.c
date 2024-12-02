@@ -198,8 +198,9 @@ int b_write (b_io_fd fd, char * buffer, int count)
             memcpy(fcbArray[fd].buffer + fcbArray[fd].index, tempBuf, 
 				   (B_CHUNK_SIZE - fcbArray[fd].index));
 
-            // commitBlock(fcbArray[fd].buffer); //  need to either use lba write but with specific parameters
-			// while also using allocate Blocks and find a free block to write to
+			// strung together version of commitBlock to write to disk
+			int freeBlock = allocateBlock();
+			LBAwrite(fcbArray[fd].buffer, 1, freeBlock);
 
             // temp is moved ahead after the copied contents for next write
             tempBuf += (B_CHUNK_SIZE - fcbArray[fd].index);
@@ -223,8 +224,9 @@ int b_write (b_io_fd fd, char * buffer, int count)
     // if any strings are leftover the buffer will be commited
     if(fcbArray[fd].index > 0)
     {
-        // commitBlock(fcbArray[fd].buffer); //  need to either use lba write but with specific parameters
-		// while also using allocate Blocks and find a free block to write to
+        // strung together version of commitBlock to write to disk
+		int freeBlock = allocateBlock();
+		LBAwrite(fcbArray[fd].buffer, 1, freeBlock);
     }
 
     // tempBuf is deallocated
