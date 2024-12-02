@@ -108,8 +108,11 @@ b_io_fd b_open (char * filename, int flags)
 	int* index = NULL;
 	char* lastElement = NULL;
 
-	// save the file info returned from GetFileInfo
+	// gathers the index of the file in the parent
 	parsePath(filename, &fcbArray[fd].fi, &index, &lastElement);
+
+	// gets the of the Directory Entry with info from parsepath
+	LBAread(fcbArray[fd].fi, 1, *index + fcbArray[fd].fi->blockPos);
 	// if GetFileInfo returns null return a negative
 	if(fcbArray[fd].fi == NULL)
 	{
@@ -127,7 +130,7 @@ b_io_fd b_open (char * filename, int flags)
 	// clear the fcbArray members before read
 	fcbArray[fd].index = 0;
 	fcbArray[fd].bufferUsed = 0;
-	fcbArray[fd].blockPosition = fcbArray[fd].fi->blockPos;
+	fcbArray[fd].blockPosition = *index + fcbArray[fd].fi->blockPos;
 	fcbArray[fd].dirPosition = *index;
 	fcbArray[fd].totalBlocks = (fcbArray[fd].fi->size + (B_CHUNK_SIZE - 1)) 
 							   / B_CHUNK_SIZE;
