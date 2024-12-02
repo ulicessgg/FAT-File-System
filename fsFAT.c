@@ -139,6 +139,15 @@ void debugFreeSpaceChain() { // used for debugging
     printf("End of free-space chain at block %lu\n", current);
 }
 
+// Function to find and allocate a single free block
+int allocateBlock(int * bufferOfFat, int currentIndex, int bufferSize) {
+    for (int i = currentIndex ; i < bufferSize; i++) {
+        if (bufferOfFat[i] == FAT_FREE) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 
 // Function to allocate multiple blocks for a file, returns starting block index
@@ -146,16 +155,18 @@ void debugFreeSpaceChain() { // used for debugging
 // minContigious = the min ammount of blocks you want to be contigious
 int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
 
-    // allocating a buffer to hold the total size of the fat
-    int * bufferOfFat = malloc(vcb->fatSize*BLOCKSIZE);
-
+    // Calculateing and allocating a buffer to hold the 
+    // total size of the fat
+    int bufferSize = vcb->fatSize*BLOCKSIZE;
+    int * bufferOfFat = malloc(bufferSize);
     int congtigiousIndex = 0;
 
+
     //check to see if right calculation for # of int;s in the buff
-    printf("\n# of Int's in buff: %d\n", (vcb->fatSize*BLOCKSIZE)/4);
+    printf("\n# of Int's in buff: %d\n", (bufferSize)/4);
 
     // Finding first freeblock
-    for(int i =0; i <= bufferOfFat[(vcb->fatSize*BLOCKSIZE)/4]; i++)
+    for(int i =0; i <= bufferOfFat[(bufferSize)/4]; i++)
     {
         // If the block is free we need to check if there is
         // congigious space for the rest of the disk
@@ -186,25 +197,75 @@ int allocateBlocks(uint64_t blockCount, uint64_t minContigiuos) {
         }
         congtigiousIndex++;
     }
-    
+
+
+     // Finding first freeblock
+    for(int i =0; i <= 12; i++)
+    {
+        // If the block is free we need to check if there is
+        // congigious space for the rest of the disk
+        if(bufferOfFat[congtigiousIndex] == 0)
+        {
+            // Now we know the index we are at refers to
+            // a free block, now have to check for a
+            // contigious list of free blocks
+            int tempIndex = congtigiousIndex;
+            int temp = 0;
+            for(int x=0; x<= minContigiuos; x++)
+            {
+                if(bufferOfFat[tempIndex] != FAT_FREE ||  x == minContigiuos)
+                {
+                    break;
+                }
+                tempIndex++;
+                temp++;
+            }
+            // Case that there is a list of contigious blocks
+            // means that we can use the index found from the
+            // first for loop
+            if(temp == minContigiuos)
+            {
+                break;
+            }
+
+        }
+        congtigiousIndex++;
+    }
+
+    int index = congtigiousIndex;
     
 
+    while (blockCount > 0)
+    {
+        int nextBlockChain = -1;
+
+        // looping through the number of blocks we need
+        // leaving out the last block
+        if (blockCount > 1)
+        {
+            nextBlockChain = allocateBlock(bufferOfFat, index+1, bufferSize);
+            if (nextBlockChain == -1) {
+                printf("\nNo more available blocks\n");
+                break;
+            }
+        }
+        // When we have reached the EOF
+        else
+        {
+            nextBlockChain = FAT_EOF;
+        }
+
+        bufferOfFat[index] = nextBlockChain;
+        index = nextBlockChain;
+        blockCount--;
+        if (nextBlockChain == FAT_EOF) {
+            break;
+        }
+    }
 	
 	return 5;
 }
 
-// Function to find and allocate a single free block
-int allocateBlock() {
-    int block = 01;
-    for (uint64_t i = 2; i < vcb->totalBlocks; i++) {
-        if (FAT[i] == 1) { // Block is free
-            FAT[i] = 2;    // Mark block as EOF if it's single block allocation
-            vcb->freeBlockCount--;  // Update dree block count in VCB
-            return i;
-        }
-    }
-    return -1;
-}
 
 // Helper function for LBAread
 int readBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer) {
@@ -255,7 +316,8 @@ int writeBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer) {
 
         // Move to the next block in the FAT or allocate a new block
         if (FAT[currentBlock] == 0) { // End of chain
-            FAT[currentBlock] = allocateBlock(); // Allocate a new block
+        // CHECK TO SEE IF the PARAMTERS WORK:
+            FAT[currentBlock] = allocateBlock(FAT, currentBlock, (sizeof(FAT)*sizeof(int))); // Allocate a new block
             if (FAT[currentBlock] == -1) {
                 return -3; // Allocation failed
             }
