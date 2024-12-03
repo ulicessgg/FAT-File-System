@@ -29,6 +29,5 @@ int readBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer); // helper 
 int writeBlocks(uint64_t rootBlock, uint64_t numBlocks, void* buffer); // helper function for FAT
 void debugPrintFAT(); // used for debugging
 void verifyFreeSpaceChain(); // used for debugging
-void printIntHexDump(const void *buffer, size_t length);
 
 #endif

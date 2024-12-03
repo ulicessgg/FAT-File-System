@@ -34,7 +34,6 @@ int fs_mkdir(const char *pathname, mode_t mode) // Marco
     // Checking paramters passed in are valid
     if(pathname == NULL )
     {
-        printf("Error: path name is null");
         return -1;
     }
 
@@ -46,6 +45,7 @@ int fs_mkdir(const char *pathname, mode_t mode) // Marco
     char * lastElement = "not here";
     int returnVal =121212;
     returnVal = parsePath((char *)pathname, &parent, &index, &lastElement);
+    printf("----here2");
 
     // Cecking if a directory with the same name exists
     if(returnVal == 0 && parent->is_Directory == 1)
@@ -191,10 +191,9 @@ int fs_closedir(fdDir *dirp) // prash
 // Misc directory functions
 char* fs_getcwd(char *pathname, size_t size) // Marco
 {
-    // Copying the current workind directory to 
-    // the buffer user passed in
-strncpy(pathname, cwd.name, strlen(pathname));
-return pathname;
+// temp fix
+return "c";
+
 }
 
 int fs_setcwd(char *pathname)   //linux chdir // prash

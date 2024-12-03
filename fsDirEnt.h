@@ -30,6 +30,6 @@ typedef struct dir_Entry
     char name[60]; // Name of the file or directory being created, 60 bytes
 } dir_Entry;
 
-dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent) ; 
+dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent) ; // refer to 10/15 and 10/17 lecture to implement
 
 #endif

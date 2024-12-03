@@ -48,33 +48,49 @@ dir_Entry* createDirectory(int NumofEntries, dir_Entry* parent)  // refer to 10/
         exit(-1);
     }
     int location = allocateBlocks(numOfBlocks, BLOCKSIZE);
-    
-    printf("\nthe block of the root is at %d", location);
+
     if(location <= 1)
     {
         location = 2;
     }
-    printf("\nthe block of the root is at2 %d", location);
+    printf("the block of the root is at %d", location);
 
     // Used to assign the current time to directores being created now
     time_t now = time(NULL);
 
-
+/*
     // set all to free
     // Initliazing vales in the rest of the entries's
     for(int i = 2; i < actualNumOfEntries; i++)
-    {   
+    {
         new[i].creation_date = now;
         new[i].last_edited = now;
         new[i].last_accessed = now;
         new[i].is_Directory = 0;
-        strcpy(new[i].name, "NOT USED");
+        strcpy(new[i].name, "NO USED");
         new[i].size = 0;
         //TODO: Block position should be given by the allocateBlocks function
         new[i].blockPos = location;
-       
     }
-    
+    */
+    new[2].creation_date = now;
+        new[2].last_edited = now;
+        new[2].last_accessed = now;
+        new[2].is_Directory = 1;
+        strcpy(new[2].name, "dir");
+        new[2].size = 0;
+        //TODO: Block position should be given by the allocateBlocks function
+        new[2].blockPos = location;
+
+        new[3].creation_date = now;
+        new[3].last_edited = now;
+        new[3].last_accessed = now;
+        new[3].is_Directory = 0;
+        strcpy(new[3].name, "file");
+        new[3].size = 0;
+        //TODO: Block position should be given by the allocateBlocks function
+        new[3].blockPos = location;
+
     // Intializing current dir (.)
     new[0].creation_date = now;
     new[0].last_edited = now;
