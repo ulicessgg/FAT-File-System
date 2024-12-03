@@ -146,12 +146,12 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
     int* index = NULL;
     char * lastElement = "not here";
     int returnVal =121212;
-    //returnVal = parsePath("/./NOT USED", &parent, &index, &lastElement);
+    returnVal = parsePath("/./NOT USED", &parent, &index, &lastElement);
 
-	//printf("Return Value: %d\n", returnVal);
-	//printf("Parent: %s\n", parent->name);
-    //printf("Index: %p\n", (void*)index);
-    //printf("Last Element: %s\n", lastElement ? lastElement : "NULL");
+	printf("Return Value: %d\n", returnVal);
+	printf("Parent: %s\n", parent->name);
+    printf("Index: %p\n", (void*)index);
+    printf("Last Element: %s\n", lastElement ? lastElement : "NULL");
 
 
 		
