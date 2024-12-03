@@ -222,7 +222,8 @@ int fs_setcwd(char *pathname)   //linux chdir // prash
     return 0; // Success
 }
 
-int fs_isFile(char * filename)	//return 1 if file, 0 otherwise // marco
+//return 1 if file, 0 otherwise, -1 failed to find dir
+int fs_isFile(char * filename)	 // marco
 {
     if(filename == NULL || (strlen(filename) == 0))
     {
