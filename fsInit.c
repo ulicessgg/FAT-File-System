@@ -145,10 +145,6 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 		
 	}
 
-	// debugging
-	printf("freeBlockCount: %u\n", vcb->freeBlockCount);
-
-
 	return 0;
 }
 

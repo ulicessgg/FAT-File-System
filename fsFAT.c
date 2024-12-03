@@ -16,11 +16,6 @@
 // add helper functions: for lbaread, lbawrite, extend, and trim
 // root directory, how many blocks to write to disk, and buffer i will copy from
 
-/* USE THIS TO TEST THE HEXDUMP
-
-Hexdump/hexdump.linux SampleVolume --start 1 --count 3
-*/
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -39,66 +34,51 @@ Hexdump/hexdump.linux SampleVolume --start 1 --count 3
 #define BLOCKSIZE 512
 
 extern int *FAT; // Pointer to the FAT array
+extern uint64_t LBAwrite(void *buffer, uint64_t lbaCount, uint64_t lbaPosition);
+
+// Function to initialize the FAT structure
 int initFAT(uint64_t numBlocks, uint64_t blockSize) {
+    // Calculate the number of blocks needed for the FAT
     uint64_t requiredBytes = numBlocks * sizeof(int);
     uint64_t blocksOccupied = (requiredBytes + blockSize - 1) / blockSize;
 
+    // Allocate memory for the FAT in memory
     FAT = (int *)malloc(numBlocks * sizeof(int));
     if (FAT == NULL) {
         fprintf(stderr, "Error: Unable to allocate memory for FAT.\n");
         return -1;
     }
 
-    // Initialize the reserved blocks
-    for (uint64_t i = 0; i < blocksOccupied; i++) {
-        FAT[i] = (i < blocksOccupied - 1) ? (i + 1) : FAT_RESERVED;
+    // Initialize FAT: Reserved for metadata, free space chain
+    for (uint64_t i = 0; i < numBlocks; i++) {
+        if (i < blocksOccupied) {
+            FAT[i] = FAT_RESERVED; // Reserve metadata blocks
+        } else if (i == blocksOccupied) {
+            FAT[i] = FAT_EOF; // Start of the free space chain
+        } else {
+            FAT[i] = i + 1; // Link free blocks in the chain
+        }
     }
+    // Mark the last block as the end of the free space chain
+    FAT[numBlocks - 1] = FAT_EOF;
 
-    // Initialize the free blocks
-    for (uint64_t i = blocksOccupied; i < numBlocks; i++) {
-        FAT[i] = FAT_FREE;
-    }
+    // Update VCB with FAT and free space information
+    vcb->fatLoc = 0; // FAT starts at block 0
+    vcb->fatSize = blocksOccupied; // Number of blocks FAT occupies
+    vcb->freeBlockStart = blocksOccupied; // Start of free space chain
+    vcb->freeBlockCount = numBlocks - blocksOccupied; // Total free blocks
 
-    // Make sure that the last block in free space is marked as EOF
-    if (vcb->freeBlockCount > 0) {
-        uint64_t lastFreeBlock = blocksOccupied + vcb->freeBlockCount - 1;
-        FAT[lastFreeBlock] = FAT_EOF; // Mark last free block as EOF
-        printf("Last free block (FAT[%lu]) marked as EOF: %d\n", lastFreeBlock, FAT[lastFreeBlock]);
-    }
-
-    //update VCB
-    vcb->fatLoc = 0;
-    vcb->fatSize = blocksOccupied;
-    vcb->freeBlockStart = blocksOccupied;
-    vcb->freeBlockCount = numBlocks - blocksOccupied;
-
-    for (uint64_t i = blocksOccupied; i < blocksOccupied + 5; i++) {
-        printf("FAT[%lu] (start of free space) = %d\n", i, FAT[i]);
-    }
-    for (uint64_t i = numBlocks - 5; i < numBlocks; i++) {
-        printf("FAT[%lu] (end of FAT) = %d\n", i, FAT[i]);
-    }
-
+    // Write FAT to disk
     if (LBAwrite(FAT, blocksOccupied, vcb->fatLoc) != blocksOccupied) {
         fprintf(stderr, "Error: Failed to write FAT to disk.\n");
-        free(FAT);
+        free(FAT); // Free allocated memory before returning
         return -1;
-    }
-
-    int *verifyFAT = (int *)malloc(numBlocks * sizeof(int));
-    if (verifyFAT != NULL) {
-        LBAread(verifyFAT, blocksOccupied, vcb->fatLoc);
-        uint64_t lastFreeBlock = blocksOccupied + vcb->freeBlockCount - 1;
-        printf("Post-write EOF marker check: Last free block (FAT[%lu]) = %d\n", 
-               lastFreeBlock, 
-               verifyFAT[lastFreeBlock]);
-        free(verifyFAT);
     }
 
     printf("FAT initialized: %u free blocks, %u metadata blocks.\n",
            vcb->freeBlockCount, vcb->fatSize);
 
-    return 0;
+    return 0; // Success
 }
 
 void verifyFreeSpaceChain() { // used for debugging
@@ -123,9 +103,6 @@ void verifyFreeSpaceChain() { // used for debugging
         printf("Free block count matches: %lu.\n", freeCount);
     }
 }
-
-
-
 
 
 
