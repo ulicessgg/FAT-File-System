@@ -193,7 +193,7 @@ char* fs_getcwd(char *pathname, size_t size) // Marco
 {
     // Copying the current workind directory to 
     // the buffer user passed in
-strncpy(pathname, cwd.name, strlen(pathname));
+strncpy(pathname, cwd->name, strlen(pathname));
 return pathname;
 }
 
@@ -218,6 +218,7 @@ int fs_setcwd(char *pathname)   //linux chdir // prash
 
     strncpy(currentWorkingDir, pathname, MAX_PATH_LENGTH - 1);
     currentWorkingDir[MAX_PATH_LENGTH - 1] = '\0'; // Ensure null-termination
+    strcpy( (char*) pathname, cwd->name);
 
     return 0; // Success
 }
