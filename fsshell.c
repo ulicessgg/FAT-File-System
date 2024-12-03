@@ -40,7 +40,7 @@
 #define CMDMV_ON	0 // not implemented
 #define CMDMD_ON	1 // changed
 #define CMDRM_ON	1 // changed
-#define CMDCP2L_ON	0 // changed
+#define CMDCP2L_ON	0 
 #define CMDCP2FS_ON	1 // changed
 #define CMDCD_ON	1 // changed
 #define CMDPWD_ON	1 // changed
