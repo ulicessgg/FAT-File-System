@@ -130,7 +130,7 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 
 		// step 4 of milestone 1
 		// Create the root directory
-		root = createDirectory(11, NULL); // 0 for now as we are not handling files yet
+		root = createDirectory(4, NULL); // 0 for now as we are not handling files yet
 		// The current working directory is the root directory 
 		// at initalization
 		memcpy(cwd,root, blockSize);
@@ -141,6 +141,18 @@ int initFileSystem (uint64_t numberOfBlocks, uint64_t blockSize)
 
 		//int hi = fs_isDir("/file");
 		//printf("\noutput: %d", hi);
+
+		dir_Entry * parent = NULL;
+    int* index = NULL;
+    char * lastElement = "not here";
+    int returnVal =121212;
+    returnVal = parsePath("/./NOT USED", &parent, &index, &lastElement);
+
+	printf("Return Value: %d\n", returnVal);
+	printf("Parent: %s\n", parent->name);
+    printf("Index: %p\n", (void*)index);
+    printf("Last Element: %s\n", lastElement ? lastElement : "NULL");
+
 
 		
 	}

@@ -76,7 +76,7 @@ dir_Entry * loadDir(dir_Entry * entry)
 }
 
 // returns the index of where the dir is in the array
-int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastElement)
+int parsePath( char * path, dir_Entry ** returnParent, int * index, char ** lastElement)
 {
     // checking to see is paramters passed in are valid
     if(path == NULL || strlen(path) == 0)
@@ -106,16 +106,18 @@ int parsePath(char * path, dir_Entry ** returnParent, int * index, char ** lastE
 
     if (start == NULL) { printf("Error: start directory is NULL\n"); return -1; }
 
+
     char* token1;
     char* token2;
     char* savePtr;
     dir_Entry * parent;
     parent = start;
 
-    printf("\nParent name: %s", parent->name);
 
     token1 = strtok_r(path,"/", &savePtr);
     printf("\ntoken1: %s", token1);
+     printf("\nR\n");
+
     // Special case: the path given is only a "/"
     // meaning a directory
     if(token1 == NULL)
