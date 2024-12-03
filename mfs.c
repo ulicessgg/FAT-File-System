@@ -153,26 +153,58 @@ fdDir* fs_opendir(const char *pathname) // prash
     return dirp;
 }
 
-struct fs_diriteminfo *fs_readdir(fdDir *dirp) {
-    if (dirp == NULL) {
-        fprintf(stderr, "Error: Invalid directory pointer\n");
-        return NULL;
+struct fs_diriteminfo *fs_readdir(fdDir *dirp) // prash or yash
+{
+    /*  returns the wrong type and not using the prototype above ^
+
+    // int readdir(const char *dirPath) do not use this edit pls
+
+    if (dirPath == NULL) {
+        fprintf(stderr, "Error: Directory path is NULL\n");
+        return -1;
     }
 
-    // Check if there are more entries to read
-    if (dirp->currentEntry >= dirp->totalEntries) {
-        return NULL; // No more entries
+    // Load the directory entry
+    dir_Entry *currentDir = locateDirectory(dirPath);
+    if (currentDir == NULL) {
+        fprintf(stderr, "Error: Directory not found\n");
+        return -1;
     }
 
-    // Retrieve the current entry
-    struct fs_diriteminfo *currentEntry = &dirp->entries[dirp->currentEntry];
+    if (currentDir->is_Directory != 1) {
+        fprintf(stderr, "Error: Path is not a directory\n");
+        return -1;
+    }
 
-    // Move to the next entry for the next call
-    dirp->currentEntry++;
+    // Load the entries in the directory
+    unsigned int numEntries = currentDir->size / sizeof(dir_Entry);
+    dir_Entry *entries = (dir_Entry *)malloc(currentDir->size);
+    if (entries == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed\n");
+        return -1;
+    }
 
-    return currentEntry;
+    if (readDirectoryEntries(currentDir->blockPos, entries, numEntries) < 0) {
+        fprintf(stderr, "Error: Failed to read directory entries\n");
+        free(entries);
+        return -1;
+    }
+
+    // Print directory entries
+    printf("Contents of directory '%s': \n", dirPath);
+    for (unsigned int i = 0; i < numEntries; i++) {
+        if (strlen(entries[i].name) > 0) { // Check if entry is valid
+            printf("%s\t%s\t%u bytes\n",
+            entries[i].is_Directory ? "[DIR]" : "[FILE]",
+            entries[i].name,
+            entries[i].size);
+        }
+    }
+
+    free(entries);
+    return 0;
+    */
 }
-
 
 int fs_closedir(fdDir *dirp) // prash
 {
@@ -321,24 +353,25 @@ int fs_delete(char* filename)	//removes a file // yash
     return 0;
 }
 
-int fs_stat(const char *path, struct fs_stat *buf) {
+int fs_stat(const char *path, struct fs_stat *buf) // prash
+{
     if (path == NULL || buf == NULL) {
         fprintf(stderr, "Error: Invalid arguments to fs_stat\n");
         return -1;
     }
 
-    // Locate the directory or file entry
-    dir_Entry *entry = locateDirectory(path); // Assume this function resolves the path
+    // Locate the file or directory
+    dir_Entry *entry = locateDirectory(path); // Use locateDirectory to resolve the path
     if (entry == NULL) {
         fprintf(stderr, "Error: Path not found\n");
         return -1;
     }
 
     // Populate the fs_stat structure
-    buf->st_size = entry->size;                // File or directory size in bytes
-    buf->st_blksize = 512;                     // Assuming a fixed block size
-    buf->st_blocks = (entry->size + 511) / 512; // Number of blocks (round up)
-    buf->st_accesstime = entry->last_accessed; // Last accessed time
-    buf->st_createtime = entry->creation_date; // Creation time
+    // buf->type = entry->is_Directory ? 1 : 0; // not using fs_stat struct 
+    // buf->size = entry->size; // not using fs_stat struct either
+
     return 0; // Success
 }
+
+
